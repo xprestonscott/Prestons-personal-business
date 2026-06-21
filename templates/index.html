@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preston Scott | Websites & AI Integration</title>
+<style>
+  :root {
+    --bg: #04060c;
+    --text: #e9eef5;
+    --muted: #8c99ac;
+    --accent: #4fc3ff;
+    --accent-rgb: 79,195,255;
+    --card-border: rgba(79,195,255,0.16);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    overflow-x: hidden;
+  }
+  .layout {
+    display: flex;
+    min-height: 100vh;
+  }
+  .main {
+    flex: 1;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 2rem;
+  }
+  .sidebar {
+    width: 190px;
+    flex-shrink: 0;
+    padding: 3rem 1.2rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    border-left: 1px solid rgba(255,255,255,0.06);
+  }
+  .sidebar-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #d9dee6;
+    opacity: 0.5;
+    margin-bottom: 1.1rem;
+  }
+  .tab-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-left: 2px solid rgba(255,255,255,0.08);
+    color: #d9dee6;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 0.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .tab-btn:hover, .tab-btn.active {
+    border-left: 2px solid var(--accent);
+    color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.05);
+  }
+
+  .page { display: none; animation: fadeUp 0.6s ease-out both; }
+  .page.active { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  #galaxy-wrap { display: flex; justify-content: center; margin-bottom: 1rem; }
+
+  .business-badge-wrap { text-align: center; margin-bottom: 2.2rem; }
+  .business-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--card-border);
+    display: inline-block;
+    padding: 0.6rem 1.6rem;
+    border-radius: 30px;
+    background: rgba(var(--accent-rgb), 0.05);
+    box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.1);
+  }
+
+  .hero-title {
+    font-size: 3.1rem;
+    font-weight: 800;
+    text-align: center;
+    line-height: 1.18;
+    text-shadow: 0 0 36px rgba(var(--accent-rgb), 0.32);
+  }
+  .hero-tagline {
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--accent);
+    margin: 1.2rem auto;
+    max-width: 600px;
+    line-height: 1.6;
+  }
+  .hero-desc {
+    text-align: center;
+    max-width: 580px;
+    margin: 0 auto 2.4rem auto;
+    color: var(--muted);
+    font-size: 0.98rem;
+    line-height: 1.85;
+  }
+
+  .btn-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+  .btn {
+    background: rgba(255,255,255,0.02);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 6px;
+    padding: 0.9rem 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    font-size: 0.86rem;
+    cursor: pointer;
+    transition: all 0.28s cubic-bezier(0.16,1,0.3,1);
+    min-width: 220px;
+  }
+  .btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 26px rgba(var(--accent-rgb), 0.22);
+    transform: translateY(-2px);
+  }
+  .btn-primary {
+    background: rgba(var(--accent-rgb), 0.13);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    margin: 4rem 0;
+    background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),0.28), transparent);
+  }
+
+  .section-label {
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.7rem;
+  }
+  .section-title { text-align: center; font-size: 1.95rem; font-weight: 800; margin-bottom: 1rem; }
+  .section-sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.96rem;
+    max-width: 600px;
+    margin: 0 auto 2.2rem auto;
+    line-height: 1.85;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.015);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1.7rem 1.4rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    text-align: left;
+  }
+  .card:hover { border-color: rgba(var(--accent-rgb), 0.4); box-shadow: 0 0 28px rgba(var(--accent-rgb), 0.1); }
+  .card-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    color: var(--accent);
+    border: 1px solid var(--card-border);
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    margin-bottom: 0.6rem;
+  }
+  .card-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
+  .card-body { color: var(--muted); font-size: 0.87rem; line-height: 1.65; }
+
+  form#onboarding {
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 2.3rem 1.8rem;
+    background: rgba(255,255,255,0.012);
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+  .field label { display: block; font-size: 0.87rem; font-weight: 500; margin-bottom: 0.4rem; }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 0.7rem 0.8rem;
+    font-size: 0.9rem;
+    text-align: center;
+    transition: border-color 0.2s ease;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .field textarea { min-height: 90px; resize: vertical; }
+  .privacy-note { text-align: center; color: var(--muted); font-size: 0.82rem; margin: 1rem auto 1.4rem; max-width: 480px; line-height: 1.6; }
+  .submit-btn {
+    width: 100%;
+    background: rgba(var(--accent-rgb), 0.13);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 0.95rem;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .submit-btn:hover { box-shadow: 0 0 28px rgba(var(--accent-rgb), 0.3); }
+
+  .success-box {
+    text-align: center;
+    border: 1px solid rgba(79,195,255,0.3);
+    border-radius: 10px;
+    padding: 1.4rem;
+    color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.06);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .footer-note { text-align: center; color: var(--muted); font-size: 0.78rem; margin-top: 3.5rem; letter-spacing: 0.03em; }
+
+  #onboarding-wrap { display: none; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="main">
+
+    <!-- ===== HOME PAGE ===== -->
+    <div class="page active" id="page-home">
+
+      <div id="galaxy-wrap">
+        <canvas id="galaxy" width="900" height="340"></canvas>
+      </div>
+
+      <div class="business-badge-wrap">
+        <span class="business-badge">Preston Scott Websites &amp; AI Integration</span>
+      </div>
+
+      <h1 class="hero-title">Websites and AI Tools That<br>Grow Local Businesses</h1>
+      <p class="hero-tagline">You run the business. I build the website and AI tools that bring in more calls, more bookings, and more customers.</p>
+      <p class="hero-desc">
+        Most small businesses lose customers to competitors with better websites, or no website
+        at all. I build clean, mobile-friendly sites and practical AI tools that work as hard as
+        you do. Projects start at $400.
+      </p>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="alert('Let\\'s talk about growing your business. Call or text to schedule.')">GET A FREE STRATEGY CALL</button>
+        <button class="btn" onclick="showOnboarding()">START ONBOARDING</button>
+      </div>
+
+      <div id="onboarding-wrap">
+        <div class="divider"></div>
+        <p class="section-label">Get Started</p>
+        <p class="section-title">Tell me about your business</p>
+        <p class="section-sub">Fill this out and I will personally review it and respond.</p>
+
+        <div id="form-success" class="success-box" style="display:none;">
+          Thank you. Your information has been received. I will reach out shortly.
+        </div>
+
+        <form id="onboarding" onsubmit="return submitForm(event)">
+          <div class="form-grid">
+            <div class="field">
+              <label>Business Name *</label>
+              <input type="text" name="business_name" required>
+            </div>
+            <div class="field">
+              <label>Business Type / Industry *</label>
+              <input type="text" name="business_type" placeholder="e.g. Gym, Construction" required>
+            </div>
+            <div class="field">
+              <label>Current Website (if any)</label>
+              <input type="text" name="current_website" placeholder="Leave blank if none">
+            </div>
+            <div class="field">
+              <label>Preferred Contact Method *</label>
+              <select name="contact_method" required>
+                <option value="Phone">Phone</option>
+                <option value="Email">Email</option>
+                <option value="Text">Text</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Main Goal *</label>
+              <input type="text" name="main_goal" placeholder="e.g. More leads, online booking" required>
+            </div>
+            <div class="field">
+              <label>Phone Number or Email *</label>
+              <input type="text" name="contact_info" required>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom: 1rem;">
+            <label>Biggest Challenge Right Now *</label>
+            <textarea name="challenge" placeholder="What is frustrating you most about your current online presence?" required></textarea>
+          </div>
+          <p class="privacy-note">All information goes directly to me. I will personally review and respond.</p>
+          <button type="submit" class="submit-btn">Submit</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== PROJECTS PAGE ===== -->
+    <div class="page" id="page-projects">
+      <p class="section-label">Recent Work</p>
+      <p class="section-title">Projects</p>
+      <p class="section-sub">A sample of the kind of work I build for local businesses.</p>
+
+      <div class="card">
+        <span class="card-tag">Web Design</span>
+        <div class="card-title">VibeFit Pro</div>
+        <div class="card-body">An AI-powered fitness app with personalized workout generation, nutrition tracking, and a coaching chat assistant.</div>
+      </div>
+      <div class="card">
+        <span class="card-tag">Business Tools</span>
+        <div class="card-title">Life OS</div>
+        <div class="card-body">A personal productivity and business operating system built with React, covering daily habits, freelance client tracking, and outreach management.</div>
+      </div>
+      <div class="card">
+        <span class="card-tag">AI Integration</span>
+        <div class="card-title">Custom Chat Assistants</div>
+        <div class="card-body">Website chat tools that answer customer questions and capture leads automatically, even outside business hours.</div>
+      </div>
+    </div>
+
+    <!-- ===== ABOUT PAGE ===== -->
+    <div class="page" id="page-about">
+      <p class="section-label">Who I Am</p>
+      <p class="section-title">About the Business</p>
+      <p class="section-sub">
+        Preston Scott Websites &amp; AI Integration is based in Oklahoma and focused on
+        helping small and local businesses compete online. I build clean, modern websites
+        and practical AI tools designed around what actually grows a business: more leads,
+        more bookings, and less time spent on manual follow-up. Every project starts with
+        understanding your goals before a single line of code is written.
+      </p>
+    </div>
+
+    <!-- ===== SERVICES PAGE ===== -->
+    <div class="page" id="page-services">
+      <p class="section-label">What I Offer</p>
+      <p class="section-title">Services</p>
+
+      <div class="card">
+        <div class="card-title">Website Design and Development</div>
+        <div class="card-body">Custom, mobile-friendly websites built to load fast and convert visitors into customers. Starting at $400.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">AI Chat Assistants</div>
+        <div class="card-body">Automated, on-brand chat tools that answer customer questions and capture leads around the clock.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Booking and Follow-Up Automation</div>
+        <div class="card-body">Automated booking systems and lead follow-up sequences that save you hours every week.</div>
+      </div>
+    </div>
+
+    <p class="footer-note">PRESTON SCOTT &middot; WEBSITES &amp; AI INTEGRATION &middot; OKLAHOMA</p>
+  </div>
+
+  <!-- ===== SIDEBAR NAV ===== -->
+  <div class="sidebar">
+    <p class="sidebar-title">Navigate</p>
+    <button class="tab-btn active" onclick="showPage('home', this)">Home</button>
+    <button class="tab-btn" onclick="showPage('projects', this)">Projects</button>
+    <button class="tab-btn" onclick="showPage('about', this)">About</button>
+    <button class="tab-btn" onclick="showPage('services', this)">Services</button>
+  </div>
+</div>
+
+<script>
+  function showPage(name, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showOnboarding() {
+    document.getElementById('onboarding-wrap').style.display = 'block';
+    document.getElementById('onboarding-wrap').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function submitForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('onboarding');
+    const data = new FormData(form);
+
+    fetch('/submit', {
+      method: 'POST',
+      body: data,
+    })
+    .then(res => res.json())
+    .then(result => {
+      if (result.success) {
+        form.style.display = 'none';
+        document.getElementById('form-success').style.display = 'block';
+      } else {
+        alert('Something went wrong. Please try again.');
+      }
+    })
+    .catch(() => {
+      alert('Could not submit right now. Please try again.');
+    });
+
+    return false;
+  }
+
+  // Blue galaxy spiral animation
+  (function() {
+    const canvas = document.getElementById('galaxy');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height, cx = W/2, cy = H/2;
+    const PARTICLE_COUNT = 440;
+    const particles = [];
+    const baseColor = "79,195,255";
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push({
+        targetRadius: 20 + Math.random() * 190,
+        angleOffset: Math.random() * Math.PI * 2,
+        speed: 0.0022 + Math.random() * 0.0038,
+        spiralTightness: 2.2 + Math.random() * 1.7,
+        size: Math.random() * 1.9 + 0.4,
+        birth: -(Math.random() * 270),
+        twinkleSpeed: 0.018 + Math.random() * 0.05,
+        twinklePhase: Math.random() * Math.PI * 2,
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      const coreGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 65);
+      coreGlow.addColorStop(0, `rgba(${baseColor}, 0.55)`);
+      coreGlow.addColorStop(1, `rgba(${baseColor}, 0)`);
+      ctx.fillStyle = coreGlow;
+      ctx.beginPath(); ctx.arc(cx, cy, 65, 0, Math.PI*2); ctx.fill();
+
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(${baseColor}, 0.95)`;
+      ctx.arc(cx, cy, 3, 0, Math.PI*2);
+      ctx.fill();
+
+      for (const p of particles) {
+        p.birth += 1;
+        if (p.birth < 0) continue;
+
+        const progress = Math.min(p.birth * p.speed * 60, 1);
+        const r = progress * p.targetRadius;
+        const angle = p.angleOffset + p.birth * p.speed * p.spiralTightness;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r * 0.52;
+
+        p.twinklePhase += p.twinkleSpeed;
+        const twinkle = 0.5 + 0.5 * Math.sin(p.twinklePhase);
+        const opacity = (0.25 + 0.6 * twinkle) * Math.min(progress * 1.5, 1);
+
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${baseColor}, ${opacity.toFixed(3)})`;
+        ctx.shadowColor = `rgba(${baseColor}, ${(opacity*0.8).toFixed(3)})`;
+        ctx.shadowBlur = 6;
+        ctx.arc(x, y, p.size, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      ctx.shadowBlur = 0;
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+</script>
+
+</body>
+</html>
