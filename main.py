@@ -1,19 +1,41 @@
-import os
-import subprocess
+from flask import Flask, render_template, request, jsonify
+from datetime import datetime
 
-BASE = r"C:\Users\prest\PycharmProjects\PythonProject"
+app = Flask(__name__)
 
-# requirements.txt - tells Render what to install
-with open(os.path.join(BASE, "requirements.txt"), "w", encoding="utf-8") as f:
-    f.write("flask\ngunicorn\n")
-print("requirements.txt created")
 
-# .gitignore - don't upload junk to GitHub
-with open(os.path.join(BASE, ".gitignore"), "w", encoding="utf-8") as f:
-    f.write(".venv/\n__pycache__/\n*.pyc\nsubmissions.txt\n")
-print(".gitignore created")
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-print("\nNow run these commands one at a time in the terminal:")
-print("git init")
-print("git add -A")
-print('git commit -m "Initial commit"')
+
+@app.route("/submit", methods=["POST"])
+def submit():
+    business_name = request.form.get("business_name", "")
+    business_type = request.form.get("business_type", "")
+    current_website = request.form.get("current_website", "") or "None"
+    main_goal = request.form.get("main_goal", "")
+    challenge = request.form.get("challenge", "")
+    contact_method = request.form.get("contact_method", "")
+    contact_info = request.form.get("contact_info", "")
+
+    entry = (
+        f"\n{'='*50}\n"
+        f"Submitted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        f"Business Name: {business_name}\n"
+        f"Business Type: {business_type}\n"
+        f"Current Website: {current_website}\n"
+        f"Main Goal: {main_goal}\n"
+        f"Biggest Challenge: {challenge}\n"
+        f"Preferred Contact: {contact_method}\n"
+        f"Contact Info: {contact_info}\n"
+    )
+
+    with open("submissions.txt", "a", encoding="utf-8") as f:
+        f.write(entry)
+
+    return jsonify({"success": True})
+
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
