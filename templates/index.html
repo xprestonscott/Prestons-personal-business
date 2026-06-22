@@ -397,7 +397,7 @@
 <body>
 
 <!-- INTRO BUILD OVERLAY -->
-<div id="introOverlay" style="position:fixed; inset:0; z-index:500; background:#0a0a0c; display:flex; align-items:center; justify-content:center; transition:opacity 0.6s ease;">
+<div id="introOverlay" style="position:fixed; inset:0; width:100vw; height:100vh; min-height:100dvh; z-index:500; background:#0a0a0c; display:flex; align-items:center; justify-content:center; transition:opacity 0.6s ease;">
   <canvas id="introCanvas" style="width:100%; height:100%; display:block;"></canvas>
 </div>
 
@@ -602,37 +602,70 @@
   window.addEventListener('resize', resize);
   resize();
 
-  // font size scales relative to the smaller screen dimension, so the
-  // logo reads at a sensible, consistent proportion on phone or desktop
-  const fontSize = Math.min(W, H) * 0.24;
+  // small, elegant wordmark — not a bold display logo. Sized relative to
+  // screen width so it reads as a refined mark, not a headline.
+  const fontSize = Math.min(W, H) * 0.045;
+  const letterSpacing = fontSize * 0.32; // wide tracking for that refined look
 
-  // Draws the solid chrome-filled logo, centered, no rotation.
+  // Draws text with manual letter-spacing (canvas has no native letter-spacing
+  // for fillText), returning the total rendered width.
+  function drawTrackedText(c, text, x, y, spacing){
+    let widths = [];
+    let total = 0;
+    for(const ch of text){
+      const w = c.measureText(ch).width;
+      widths.push(w);
+      total += w + spacing;
+    }
+    total -= spacing; // no trailing space after the last character
+    let cursor = x - total/2;
+    for(let i=0;i<text.length;i++){
+      c.fillText(text[i], cursor + widths[i]/2, y);
+      cursor += widths[i] + spacing;
+    }
+    return total;
+  }
+
+  // Draws the small chrome wordmark, centered, with a thin underline.
   function drawSolidChrome(opacity){
     if(opacity <= 0.001) return;
+
+    // Build the mask first: text + underline together, drawn normally
+    // (white shapes on transparent), so a single destination-in pass
+    // against the gradient clips to BOTH shapes correctly.
+    const mask = document.createElement('canvas');
+    mask.width = W; mask.height = H;
+    const mctx = mask.getContext('2d');
+    mctx.font = `500 ${fontSize}px Inter, -apple-system, sans-serif`;
+    mctx.textAlign = 'center';
+    mctx.textBaseline = 'middle';
+    mctx.fillStyle = '#fff';
+    const textWidth = drawTrackedText(mctx, 'PRESTON SCOTT SYSTEMS', W/2, H/2, letterSpacing);
+
+    const lineY = H/2 + fontSize * 0.85;
+    const lineWidth = textWidth * 0.55;
+    mctx.fillRect(W/2 - lineWidth/2, lineY, lineWidth, Math.max(1, fontSize*0.018));
+
     const tmp = document.createElement('canvas');
     tmp.width = W; tmp.height = H;
     const tctx = tmp.getContext('2d');
 
     const grad = tctx.createLinearGradient(W*0.32, H*0.42, W*0.68, H*0.58);
-    grad.addColorStop(0.00, '#050506');
-    grad.addColorStop(0.16, '#1c1c1e');
-    grad.addColorStop(0.30, '#7c7c80');
-    grad.addColorStop(0.38, '#e8e8ea');
+    grad.addColorStop(0.00, '#5a5a5e');
+    grad.addColorStop(0.16, '#8c8c90');
+    grad.addColorStop(0.30, '#c8c8cc');
+    grad.addColorStop(0.38, '#f2f2f4');
     grad.addColorStop(0.45, '#ffffff');
-    grad.addColorStop(0.55, '#cfcfd2');
-    grad.addColorStop(0.66, '#3a3a3d');
-    grad.addColorStop(0.80, '#050506');
-    grad.addColorStop(0.90, '#6b6b6f');
-    grad.addColorStop(1.00, '#050506');
+    grad.addColorStop(0.55, '#f0f0f2');
+    grad.addColorStop(0.66, '#a8a8ac');
+    grad.addColorStop(0.80, '#7c7c80');
+    grad.addColorStop(0.90, '#b8b8bc');
+    grad.addColorStop(1.00, '#6a6a6e');
 
     tctx.fillStyle = grad;
     tctx.fillRect(0,0,W,H);
     tctx.globalCompositeOperation = 'destination-in';
-    tctx.font = `800 ${fontSize}px Inter, -apple-system, sans-serif`;
-    tctx.textAlign = 'center';
-    tctx.textBaseline = 'middle';
-    tctx.fillStyle = '#fff';
-    tctx.fillText('PS × AI', W/2, H/2);
+    tctx.drawImage(mask, 0, 0);
 
     ctx.save();
     ctx.globalAlpha = opacity;
@@ -642,7 +675,7 @@
 
   // ---- Phase timing (ms) ----
   const FADE_IN_DURATION  = 700;   // chrome fades in
-  const HOLD_DURATION     = 1800;  // holds still, fully readable
+  const HOLD_DURATION     = 2800;  // holds still, fully readable
   const FADE_OUT_DURATION = 900;   // overlay fades out, reveals the site
 
   const T_FADEIN_END = FADE_IN_DURATION;
@@ -673,11 +706,13 @@
     } else {
       overlay.style.display = 'none';
       document.body.style.overflow = '';
+      window.__introDone = true;
     }
   }
 
   if(reduceMotion){
     overlay.style.display = 'none';
+    window.__introDone = true;
   } else {
     document.body.style.overflow = 'hidden';
     requestAnimationFrame(frame);
@@ -803,8 +838,10 @@ let logoPhase = 0;
 
 function step(){
   elapsed += 1;
-  if(!reduceMotion2 && logoPhase < 1) logoPhase = Math.min(1, logoPhase + 0.012);
-  else if(reduceMotion2) logoPhase = 1;
+  if(window.__introDone){
+    if(!reduceMotion2 && logoPhase < 1) logoPhase = Math.min(1, logoPhase + 0.012);
+    else if(reduceMotion2) logoPhase = 1;
+  }
 
   // smooth the scroll value so the scatter/reconstruct feels fluid, not jumpy
   scrollSmooth += (scrollTarget - scrollSmooth) * 0.08;
@@ -840,15 +877,17 @@ function step(){
       const ty = home.y + p.scatterY * scatter + hy;
       p.x += (tx - p.x) * 0.10;
       p.y += (ty - p.y) * 0.10;
-    } else if(local > 0){
+    } else if(logoPhase > 0 && local > 0){
       if(p.x === undefined){ p.x = home.x; p.y = home.y; }
       const tx = home.x + p.scatterX * scatter;
       const ty = home.y + p.scatterY * scatter;
       p.x += (tx - p.x) * 0.05 * local;
       p.y += (ty - p.y) * 0.05 * local;
-    } else {
-      p.x = home.x; p.y = home.y;
     }
+    // else: logoPhase is still 0 (intro hasn't finished yet) — particle
+    // simply isn't drawn at all (see alpha below), no position assigned.
+
+    if(logoPhase <= 0 && !formed) continue; // nothing to draw yet — intro still playing
 
     const size = p.hub ? p.r*1.7 : p.r;
     const alpha = (p.hub ? 0.9 : 0.65) * (1 - scatter*0.35);
