@@ -23,6 +23,11 @@
     font-family:'Inter', -apple-system, 'Segoe UI', sans-serif;
     overflow-x:hidden;
     width:100%;
+    position:relative;
+  }
+  nav, .hero, .ethos, .process, .specs, .cta, footer, .menu-overlay{
+    position:relative;
+    z-index:1;
   }
   ::selection{ background:var(--orange); color:#0a0a0c; }
 
@@ -102,8 +107,10 @@
     overflow:hidden;
   }
   #particleCanvas{
-    position:absolute; top:0; left:0; width:100%; height:100%;
+    position:fixed; top:0; left:0; width:100%; height:100%;
     display:block;
+    z-index:0;
+    pointer-events:none;
   }
   .hero-glow{
     position:absolute; inset:0;
@@ -235,7 +242,7 @@
 
   /* ===== PROCESS (dark, monochrome-style imagery via CSS) ===== */
   .process{
-    background:#0a0a0c;
+    background:rgba(10,10,12,0.92);
     padding:130px 8vw;
     border-bottom:1px solid var(--line);
   }
@@ -282,7 +289,7 @@
 
   /* ===== SPECS / SERVICES ===== */
   .specs{
-    background:#0a0a0c;
+    background:rgba(10,10,12,0.92);
     padding:130px 8vw;
   }
   .specs-head{ margin-bottom:60px; }
@@ -311,7 +318,7 @@
 
   /* ===== CTA / FOOTER ===== */
   .cta{
-    background:#0a0a0c;
+    background:rgba(10,10,12,0.92);
     padding:160px 8vw 100px;
     text-align:center;
     border-top:1px solid var(--line);
@@ -389,6 +396,13 @@
 </head>
 <body>
 
+<!-- INTRO BUILD OVERLAY -->
+<div id="introOverlay" style="position:fixed; inset:0; z-index:500; background:#0a0a0c; display:flex; align-items:center; justify-content:center; transition:opacity 0.6s ease;">
+  <canvas id="introCanvas" style="width:100%; height:100%; display:block;"></canvas>
+</div>
+
+<canvas id="particleCanvas"></canvas>
+
 <!-- NAV -->
 <nav>
   <div class="nav-left">
@@ -411,11 +425,11 @@
 
 <!-- HERO -->
 <section class="hero">
-  <canvas id="particleCanvas"></canvas>
   <div class="hero-glow"></div>
   <div class="hero-content">
     <div class="eyebrow mono">Websites & AI Systems</div>
     <h1>BUILT<br>TO <em>RUN</em></h1>
+    <div id="heroLogoZone" style="width:100%; max-width:480px; height:90px; margin:6px auto 0;"></div>
     <p class="hero-sub">Custom websites and practical AI tools for small businesses across Oklahoma. Less manual follow-up. More booked jobs. Systems that work while you're on the job site.</p>
     <a href="#process" style="text-decoration:none;">
       <div class="hero-arrow">
@@ -565,10 +579,135 @@
 </div>
 
 <script>
-/* ===== PARTICLE HERO ANIMATION =====
-   Particles drift as a loose field, then cohere into a node/network
-   shape (representing "system" / structure), then disperse — looping.
-*/
+/* =========================================================
+   PART 1 — INTRO BUILD OVERLAY
+   Full-screen one-time animation: particles fly in from the
+   edges of the screen, converge into "PS × AI", hold briefly,
+   then fade away to reveal the real page underneath.
+   ========================================================= */
+(function(){
+  const overlay = document.getElementById('introOverlay');
+  const canvas = document.getElementById('introCanvas');
+  const ctx = canvas.getContext('2d');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let W, H, DPR;
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.offsetWidth; H = canvas.offsetHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function sampleLogoPositions(targetW, targetH, fontScale){
+    const off = document.createElement('canvas');
+    off.width = targetW; off.height = targetH;
+    const octx = off.getContext('2d');
+    const fontSize = Math.min(targetW, targetH) * fontScale;
+    octx.fillStyle = '#fff';
+    octx.font = `800 ${fontSize}px Inter, -apple-system, sans-serif`;
+    octx.textAlign = 'center';
+    octx.textBaseline = 'middle';
+    octx.fillText('PS × AI', targetW/2, targetH/2);
+    const imgData = octx.getImageData(0,0,targetW,targetH).data;
+    const pts = [];
+    const step = Math.max(2, Math.floor(Math.min(targetW,targetH) / 200));
+    for(let y=0; y<targetH; y+=step){
+      for(let x=0; x<targetW; x+=step){
+        if (imgData[(y*targetW+x)*4+3] > 80) pts.push({x,y});
+      }
+    }
+    for(let i=pts.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [pts[i],pts[j]] = [pts[j],pts[i]];
+    }
+    return pts;
+  }
+
+  const COUNT = window.innerWidth < 700 ? 220 : 360;
+  const targets = sampleLogoPositions(W, H, 0.22);
+
+  class IP{
+    constructor(i){
+      // start scattered just outside the screen edges, on a random side
+      const side = Math.floor(Math.random()*4);
+      if(side===0){ this.x = Math.random()*W; this.y = -40 - Math.random()*H*0.5; }
+      else if(side===1){ this.x = W+40+Math.random()*W*0.5; this.y = Math.random()*H; }
+      else if(side===2){ this.x = Math.random()*W; this.y = H+40+Math.random()*H*0.5; }
+      else { this.x = -40-Math.random()*W*0.5; this.y = Math.random()*H; }
+
+      this.target = targets[i % Math.max(targets.length,1)] || {x:W/2,y:H/2};
+      this.r = Math.random()*1.4 + 0.6;
+      this.hub = Math.random() < 0.06;
+      this.delay = Math.random() * 0.35; // staggered arrival, 0..0.35 of the build window
+      this.speed = 0.05 + Math.random()*0.04;
+    }
+  }
+  const particles = Array.from({length:COUNT}, (_,i)=> new IP(i));
+
+  const BUILD_DURATION = 2600;   // ms — particles flying in and converging
+  const HOLD_DURATION  = 700;    // ms — logo fully formed, holds still
+  const FADE_DURATION  = 600;    // ms — overlay fades out
+  const start = performance.now();
+
+  function frame(now){
+    const elapsed = now - start;
+    ctx.clearRect(0,0,W,H);
+
+    const buildT = Math.min(1, elapsed / BUILD_DURATION);
+
+    for(const p of particles){
+      // staggered ease: each particle starts moving at its own delay point
+      const local = Math.min(1, Math.max(0, (buildT - p.delay) / (1 - p.delay)));
+      const eased = 1 - Math.pow(1 - local, 3); // ease-out cubic
+      p.x += (p.target.x - p.x) * Math.max(eased*0.18, 0.02);
+      p.y += (p.target.y - p.y) * Math.max(eased*0.18, 0.02);
+
+      const size = p.hub ? p.r*2.2 : p.r;
+      const alpha = p.hub ? 0.95 : 0.7;
+      ctx.beginPath();
+      ctx.fillStyle = p.hub ? `rgba(255,122,26,${alpha})` : `rgba(232,230,225,${alpha})`;
+      ctx.arc(p.x, p.y, size, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    if(elapsed < BUILD_DURATION + HOLD_DURATION || reduceMotion === false){
+      if(elapsed < BUILD_DURATION + HOLD_DURATION){
+        requestAnimationFrame(frame);
+        return;
+      }
+    }
+
+    // fade out
+    const fadeT = Math.min(1, (elapsed - BUILD_DURATION - HOLD_DURATION) / FADE_DURATION);
+    overlay.style.opacity = String(1 - fadeT);
+    if(fadeT < 1){
+      requestAnimationFrame(frame);
+    } else {
+      overlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  }
+
+  if(reduceMotion){
+    // skip the animated build entirely, just remove the overlay
+    overlay.style.display = 'none';
+  } else {
+    document.body.style.overflow = 'hidden'; // lock scroll during intro
+    requestAnimationFrame(frame);
+  }
+})();
+
+/* =========================================================
+   PART 2 — PERSISTENT BACKDROP
+   Fixed full-page canvas behind every section. Ambient ASCII-
+   network drift everywhere, PLUS a small legible "PS × AI"
+   logo trace held in place directly under the hero headline
+   (positioned to match #heroLogoZone). Whole thing rotates
+   gently with scroll.
+   ========================================================= */
 const canvas = document.getElementById('particleCanvas');
 const ctx = canvas.getContext('2d');
 let W, H, DPR;
@@ -578,98 +717,159 @@ function resize(){
   canvas.width = W * DPR; canvas.height = H * DPR;
   ctx.setTransform(DPR,0,0,DPR,0,0);
 }
-window.addEventListener('resize', resize);
+window.addEventListener('resize', ()=>{ resize(); rebuildLogoTarget(); });
 resize();
 
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduceMotion2 = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const COUNT = window.innerWidth < 700 ? 90 : 170;
-let particles = [];
+// ---- Scroll-reactive deconstruct/reconstruct ----
+// Scatter amount ramps from 0 to 1 over the first ~1.1 viewport-heights of
+// scroll, then stays fully scattered beyond that. Scrolling back reverses it.
+let scrollTarget = 0;
+let scrollSmooth = 0;
+function onScroll(){
+  const span = window.innerHeight * 1.1;
+  scrollTarget = Math.min(1, Math.max(0, window.scrollY / span));
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
 
-function buildTargetShape(){
-  // Build a node-graph "system" shape: a grid of nodes with a few
-  // emphasized hub points, roughly centered, scaled to viewport.
-  const cx = W/2, cy = H/2;
-  const scale = Math.min(W, H) * 0.32;
+// ---- Logo target positions, sized + placed to match #heroLogoZone exactly ----
+let logoTargets = [];
+function rebuildLogoTarget(){
+  const zone = document.getElementById('heroLogoZone');
+  if(!zone){ logoTargets = []; return; }
+  const rect = zone.getBoundingClientRect();
+  const zw = Math.max(1, Math.round(rect.width));
+  const zh = Math.max(1, Math.round(rect.height));
+
+  const off = document.createElement('canvas');
+  off.width = zw; off.height = zh;
+  const octx = off.getContext('2d');
+  const fontSize = zh * 0.78;
+  octx.fillStyle = '#fff';
+  octx.font = `800 ${fontSize}px Inter, -apple-system, sans-serif`;
+  octx.textAlign = 'center';
+  octx.textBaseline = 'middle';
+  octx.fillText('PS × AI', zw/2, zh/2);
+
+  const imgData = octx.getImageData(0,0,zw,zh).data;
   const pts = [];
-  const cols = 9, rows = 5;
-  for(let r=0;r<rows;r++){
-    for(let c=0;c<cols;c++){
-      const x = cx + (c/(cols-1) - 0.5) * scale * 2.1;
-      const y = cy + (r/(rows-1) - 0.5) * scale * 1.1;
-      // skip some to make it organic, not a grid
-      if (Math.random() < 0.32) continue;
-      pts.push({x: x + (Math.random()-0.5)*14, y: y + (Math.random()-0.5)*14});
-    }
-  }
-  return pts;
-}
-
-let targets = buildTargetShape();
-
-class P{
-  constructor(i){
-    this.reset(i);
-  }
-  reset(i){
-    this.x = Math.random()*W;
-    this.y = Math.random()*H;
-    this.vx = (Math.random()-0.5)*0.25;
-    this.vy = (Math.random()-0.5)*0.25;
-    this.r = Math.random()*1.4 + 0.6;
-    this.target = targets[i % targets.length] || {x:W/2,y:H/2};
-    this.hub = Math.random() < 0.07;
-  }
-}
-particles = Array.from({length:COUNT}, (_,i)=> new P(i));
-
-let phase = 0; // 0..1 drift->cohere->hold->disperse cycle
-let dir = 1;
-
-function step(){
-  if(!reduceMotion){
-    phase += 0.0016 * dir;
-    if(phase > 1){ phase = 1; dir = -1; }
-    if(phase < 0){ phase = 0; dir = 1; setTimeout(()=>{ targets = buildTargetShape(); particles.forEach((p,i)=> p.target = targets[i % targets.length]); }, 50); }
-  } else {
-    phase = 0.7;
-  }
-
-  ctx.clearRect(0,0,W,H);
-
-  // connecting lines for near-cohered particles
-  const cohesion = Math.min(1, phase / 0.65);
-  if(cohesion > 0.5){
-    ctx.strokeStyle = `rgba(255,122,26,${0.10 * (cohesion-0.5)*2})`;
-    ctx.lineWidth = 1;
-    for(let i=0;i<particles.length;i++){
-      for(let j=i+1;j<particles.length;j++){
-        const a = particles[i], b = particles[j];
-        const dx = a.x-b.x, dy = a.y-b.y;
-        const d2 = dx*dx+dy*dy;
-        if(d2 < 95*95){
-          ctx.beginPath();
-          ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
-          ctx.stroke();
-        }
+  const step = Math.max(1, Math.floor(zh/65));
+  for(let y=0; y<zh; y+=step){
+    for(let x=0; x<zw; x+=step){
+      if(imgData[(y*zw+x)*4+3] > 80){
+        // convert to page coordinates (rect is viewport-relative; canvas covers viewport too)
+        pts.push({x: rect.left + x, y: rect.top + y});
       }
     }
   }
+  for(let i=pts.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [pts[i],pts[j]] = [pts[j],pts[i]];
+  }
+  logoTargets = pts;
+}
 
-  for(const p of particles){
-    const ease = Math.min(1, Math.max(0,(phase-0.05)/0.55));
-    if(ease > 0){
-      p.x += (p.target.x - p.x) * 0.02 * ease;
-      p.y += (p.target.y - p.y) * 0.02 * ease;
-    } else {
-      p.x += p.vx; p.y += p.vy;
-      if(p.x < 0 || p.x > W) p.vx *= -1;
-      if(p.y < 0 || p.y > H) p.vy *= -1;
-    }
-    const size = p.hub ? p.r*2.1 : p.r;
-    const alpha = p.hub ? 0.9 : 0.55;
+const AMBIENT_COUNT = window.innerWidth < 700 ? 70 : 130;
+let ambient = [];
+class A{
+  constructor(){
+    this.homeX = Math.random()*W; this.homeY = Math.random()*H;
+    this.x = this.homeX; this.y = this.homeY;
+    this.r = Math.random()*1.2 + 0.4;
+    // scatter vector: direction + distance this particle flies outward as scroll increases
+    const ang = Math.random()*Math.PI*2;
+    const dist = 80 + Math.random()*260;
+    this.scatterX = Math.cos(ang)*dist;
+    this.scatterY = Math.sin(ang)*dist;
+    this.spin = (Math.random()-0.5)*0.01; // tiny independent rotation while scattered
+  }
+}
+ambient = Array.from({length:AMBIENT_COUNT}, ()=> new A());
+
+class LP{
+  constructor(i){ this.reset(i); }
+  reset(i){
+    this.x = Math.random()*W; this.y = Math.random()*H;
+    this.r = Math.random()*0.65 + 0.35;
+    this.hub = Math.random() < 0.025;
+    this.hoverPhase = Math.random()*Math.PI*2;
+    this.hoverSpeed = 0.4 + Math.random()*0.5;
+    this.hoverAmp = 1.0 + Math.random()*1.2;
+    this.delay = Math.random()*0.3;
+    // scatter vector: where this particle flies as scroll deconstructs the logo
+    const ang = Math.random()*Math.PI*2;
+    const dist = 60 + Math.random()*220;
+    this.scatterX = Math.cos(ang)*dist;
+    this.scatterY = Math.sin(ang)*dist;
+  }
+}
+let logoParticles = [];
+function rebuildLogoParticles(){
+  rebuildLogoTarget();
+  logoParticles = Array.from({length: Math.max(logoTargets.length, 1)}, (_,i)=> new LP(i));
+}
+// build once layout has settled
+setTimeout(rebuildLogoParticles, 50);
+window.addEventListener('load', rebuildLogoParticles);
+
+let elapsed = 0;
+let logoPhase = 0;
+
+function step(){
+  elapsed += 1;
+  if(!reduceMotion2 && logoPhase < 1) logoPhase = Math.min(1, logoPhase + 0.012);
+  else if(reduceMotion2) logoPhase = 1;
+
+  // smooth the scroll value so the scatter/reconstruct feels fluid, not jumpy
+  scrollSmooth += (scrollTarget - scrollSmooth) * 0.08;
+  const scatter = scrollSmooth; // 0 = fully formed, 1 = fully scattered
+
+  ctx.clearRect(0,0,W,H);
+
+  // ambient field — drifts apart from its grid-like home position as you scroll,
+  // reassembles as you scroll back up. Fully reversible, position-driven.
+  for(const p of ambient){
+    const tx = p.homeX + p.scatterX * scatter;
+    const ty = p.homeY + p.scatterY * scatter;
+    p.x += (tx - p.x) * 0.12;
+    p.y += (ty - p.y) * 0.12;
     ctx.beginPath();
-    ctx.fillStyle = p.hub ? `rgba(255,122,26,${alpha})` : `rgba(232,230,225,${alpha*0.7})`;
+    ctx.fillStyle = `rgba(232,230,225,${0.30 - scatter*0.10})`;
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  // hero logo — deconstructs outward along each particle's scatter vector as you
+  // scroll down, reconstructs back into "PS × AI" as you scroll back up.
+  const formed = logoPhase > 0.96;
+  for(let i=0;i<logoParticles.length;i++){
+    const p = logoParticles[i];
+    const home = logoTargets[i] || {x:W/2,y:H/2};
+    const local = Math.min(1, Math.max(0,(logoPhase-p.delay)/(1-p.delay)));
+
+    if(formed){
+      const hx = Math.cos(elapsed*0.02*p.hoverSpeed + p.hoverPhase) * p.hoverAmp * (1-scatter*0.6);
+      const hy = Math.sin(elapsed*0.018*p.hoverSpeed + p.hoverPhase) * p.hoverAmp * (1-scatter*0.6);
+      const tx = home.x + p.scatterX * scatter + hx;
+      const ty = home.y + p.scatterY * scatter + hy;
+      p.x += (tx - p.x) * 0.10;
+      p.y += (ty - p.y) * 0.10;
+    } else if(local > 0){
+      if(p.x === undefined){ p.x = home.x; p.y = home.y; }
+      const tx = home.x + p.scatterX * scatter;
+      const ty = home.y + p.scatterY * scatter;
+      p.x += (tx - p.x) * 0.05 * local;
+      p.y += (ty - p.y) * 0.05 * local;
+    } else {
+      p.x = home.x; p.y = home.y;
+    }
+
+    const size = p.hub ? p.r*1.7 : p.r;
+    const alpha = (p.hub ? 0.9 : 0.65) * (1 - scatter*0.35);
+    ctx.beginPath();
+    ctx.fillStyle = p.hub ? `rgba(255,122,26,${alpha})` : `rgba(232,230,225,${alpha})`;
     ctx.arc(p.x, p.y, size, 0, Math.PI*2);
     ctx.fill();
   }
