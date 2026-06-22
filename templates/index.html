@@ -581,10 +581,20 @@
 
 <script>
 /* =========================================================
-   PART 1 — INTRO BUILD OVERLAY
-   Full-screen one-time animation: particles fly in from the
-   edges of the screen, converge into "PS × AI", hold briefly,
-   then fade away to reveal the real page underneath.
+   PART 1 — INTRO BUILD OVERLAY (6 seconds total)
+   Works identically on desktop and mobile — particle count and
+   sizing scale by screen width, chrome rendering is resolution-
+   independent canvas work.
+   Phases, in order:
+   1. SCATTER      — particles visible immediately, drifting
+   2. BUILD        — converge into "PS × AI" particle outline
+   3. TO_CHROME    — crossfades into SOLID chrome-filled letters
+                     (deep dark shadows, sharp bright highlights)
+   4. CHROME_SPIN  — solid chrome holds, then spins (slow→fast)
+   5. TO_PARTICLE  — crossfades back into particles
+   6. EXPLODE      — particles fly outward radially, fast
+   7. FADE         — overlay fades out during the explosion,
+                     revealing the real page underneath
    ========================================================= */
 (function(){
   const overlay = document.getElementById('introOverlay');
@@ -602,22 +612,25 @@
   window.addEventListener('resize', resize);
   resize();
 
-  function sampleLogoPositions(targetW, targetH, fontScale){
+  // font size scales relative to the smaller screen dimension, so the
+  // logo reads at a sensible, consistent proportion on phone or desktop
+  const fontSize = Math.min(W, H) * 0.24;
+
+  function sampleLogoPositions(){
     const off = document.createElement('canvas');
-    off.width = targetW; off.height = targetH;
+    off.width = W; off.height = H;
     const octx = off.getContext('2d');
-    const fontSize = Math.min(targetW, targetH) * fontScale;
     octx.fillStyle = '#fff';
     octx.font = `800 ${fontSize}px Inter, -apple-system, sans-serif`;
     octx.textAlign = 'center';
     octx.textBaseline = 'middle';
-    octx.fillText('PS × AI', targetW/2, targetH/2);
-    const imgData = octx.getImageData(0,0,targetW,targetH).data;
+    octx.fillText('PS × AI', W/2, H/2);
+    const imgData = octx.getImageData(0,0,W,H).data;
     const pts = [];
-    const step = Math.max(2, Math.floor(Math.min(targetW,targetH) / 200));
-    for(let y=0; y<targetH; y+=step){
-      for(let x=0; x<targetW; x+=step){
-        if (imgData[(y*targetW+x)*4+3] > 80) pts.push({x,y});
+    const step = Math.max(1.5, Math.floor(Math.min(W,H) / 280));
+    for(let y=0; y<H; y+=step){
+      for(let x=0; x<W; x+=step){
+        if (imgData[(y*W+x)*4+3] > 80) pts.push({x,y});
       }
     }
     for(let i=pts.length-1;i>0;i--){
@@ -627,62 +640,203 @@
     return pts;
   }
 
-  const COUNT = window.innerWidth < 700 ? 220 : 360;
-  const targets = sampleLogoPositions(W, H, 0.22);
+  const COUNT = window.innerWidth < 700 ? 320 : 460;
+  const targets = sampleLogoPositions();
+
+  // bounding box of the logo, used for the chrome gradient travel range
+  let bboxMinX = Infinity, bboxMaxX = -Infinity, bboxMinY = Infinity, bboxMaxY = -Infinity;
+  for(const t of targets){
+    if(t.x < bboxMinX) bboxMinX = t.x;
+    if(t.x > bboxMaxX) bboxMaxX = t.x;
+    if(t.y < bboxMinY) bboxMinY = t.y;
+    if(t.y > bboxMaxY) bboxMaxY = t.y;
+  }
+  if(!isFinite(bboxMinX)){ bboxMinX = 0; bboxMaxX = W; bboxMinY = 0; bboxMaxY = H; }
+  const bboxWidth = Math.max(1, bboxMaxX - bboxMinX);
+  const bboxCX = (bboxMinX+bboxMaxX)/2, bboxCY = (bboxMinY+bboxMaxY)/2;
+  const bboxDiag = Math.sqrt(bboxWidth*bboxWidth + (bboxMaxY-bboxMinY)*(bboxMaxY-bboxMinY));
 
   class IP{
     constructor(i){
-      // start scattered just outside the screen edges, on a random side
-      const side = Math.floor(Math.random()*4);
-      if(side===0){ this.x = Math.random()*W; this.y = -40 - Math.random()*H*0.5; }
-      else if(side===1){ this.x = W+40+Math.random()*W*0.5; this.y = Math.random()*H; }
-      else if(side===2){ this.x = Math.random()*W; this.y = H+40+Math.random()*H*0.5; }
-      else { this.x = -40-Math.random()*W*0.5; this.y = Math.random()*H; }
+      this.x = Math.random()*W;
+      this.y = Math.random()*H;
+      this.vx = (Math.random()-0.5)*0.4;
+      this.vy = (Math.random()-0.5)*0.4;
 
       this.target = targets[i % Math.max(targets.length,1)] || {x:W/2,y:H/2};
-      this.r = Math.random()*1.4 + 0.6;
-      this.hub = Math.random() < 0.06;
-      this.delay = Math.random() * 0.35; // staggered arrival, 0..0.35 of the build window
-      this.speed = 0.05 + Math.random()*0.04;
+      this.r = Math.random()*1.7 + 1.0;       // bigger, clearer dots
+      this.hub = Math.random() < 0.07;
+      this.delay = Math.random() * 0.35;
+
+      // explosion direction: radially outward from the logo center
+      const dx = this.target.x - W/2, dy = this.target.y - H/2;
+      const dist = Math.sqrt(dx*dx+dy*dy) || 1;
+      const burst = 260 + Math.random()*420;
+      this.exX = (dx/dist) * burst + (Math.random()-0.5)*120;
+      this.exY = (dy/dist) * burst + (Math.random()-0.5)*120;
     }
   }
   const particles = Array.from({length:COUNT}, (_,i)=> new IP(i));
 
-  const BUILD_DURATION = 2600;   // ms — particles flying in and converging
-  const HOLD_DURATION  = 700;    // ms — logo fully formed, holds still
-  const FADE_DURATION  = 600;    // ms — overlay fades out
+  // ---- Phase timing (ms) — totals exactly 6000ms ----
+  const SCATTER_DURATION     = 600;
+  const BUILD_DURATION       = 1300;
+  const TO_CHROME_DURATION   = 350;   // crossfade particles -> solid chrome
+  const CHROME_HOLD_DURATION = 500;   // chrome sits still, fully legible
+  const CHROME_SPIN_DURATION = 1100;  // chrome spins, slow accelerating to fast
+  const TO_PARTICLE_DURATION = 300;   // crossfade chrome -> particles
+  const EXPLODE_DURATION     = 1150;  // particles blast outward
+  const FADE_DURATION        = 700;   // overlay fade, overlaps explosion tail
+
+  const T_SCATTER_END    = SCATTER_DURATION;
+  const T_BUILD_END      = T_SCATTER_END + BUILD_DURATION;
+  const T_TOCHROME_END   = T_BUILD_END + TO_CHROME_DURATION;
+  const T_CHROMEHOLD_END = T_TOCHROME_END + CHROME_HOLD_DURATION;
+  const T_CHROMESPIN_END = T_CHROMEHOLD_END + CHROME_SPIN_DURATION;
+  const T_TOPARTICLE_END = T_CHROMESPIN_END + TO_PARTICLE_DURATION;
+  const T_EXPLODE_END    = T_TOPARTICLE_END + EXPLODE_DURATION;
+  const TOTAL_DURATION   = 6000;
+  const FADE_START       = TOTAL_DURATION - FADE_DURATION;
+
   const start = performance.now();
+
+  // Draws the solid chrome-filled logo. Deep near-black shadows, sharp
+  // bright highlights — matches the high-contrast reference look.
+  function drawSolidChrome(rotation, opacity, sweepT){
+    if(opacity <= 0.001) return;
+    const tmp = document.createElement('canvas');
+    tmp.width = W; tmp.height = H;
+    const tctx = tmp.getContext('2d');
+
+    const travel = bboxDiag * 1.3;
+    const gx0 = bboxCX - travel/2 + sweepT*travel - bboxDiag*0.12;
+    const gy0 = bboxCY - bboxDiag*0.12;
+    const gx1 = gx0 + bboxDiag*0.24;
+    const gy1 = bboxCY + bboxDiag*0.12;
+
+    const grad = tctx.createLinearGradient(gx0,gy0,gx1,gy1);
+    grad.addColorStop(0.00, '#050506');
+    grad.addColorStop(0.16, '#1c1c1e');
+    grad.addColorStop(0.30, '#7c7c80');
+    grad.addColorStop(0.38, '#e8e8ea');
+    grad.addColorStop(0.45, '#ffffff');
+    grad.addColorStop(0.55, '#cfcfd2');
+    grad.addColorStop(0.66, '#3a3a3d');
+    grad.addColorStop(0.80, '#050506');
+    grad.addColorStop(0.90, '#6b6b6f');
+    grad.addColorStop(1.00, '#050506');
+
+    tctx.fillStyle = grad;
+    tctx.fillRect(0,0,W,H);
+    tctx.globalCompositeOperation = 'destination-in';
+    tctx.font = `800 ${fontSize}px Inter, -apple-system, sans-serif`;
+    tctx.textAlign = 'center';
+    tctx.textBaseline = 'middle';
+    tctx.fillStyle = '#fff';
+    tctx.fillText('PS × AI', W/2, H/2);
+
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    ctx.translate(W/2, H/2);
+    ctx.rotate(rotation);
+    ctx.translate(-W/2, -H/2);
+    ctx.drawImage(tmp, 0, 0);
+    ctx.restore();
+  }
 
   function frame(now){
     const elapsed = now - start;
     ctx.clearRect(0,0,W,H);
 
-    const buildT = Math.min(1, elapsed / BUILD_DURATION);
-
-    for(const p of particles){
-      // staggered ease: each particle starts moving at its own delay point
-      const local = Math.min(1, Math.max(0, (buildT - p.delay) / (1 - p.delay)));
-      const eased = 1 - Math.pow(1 - local, 3); // ease-out cubic
-      p.x += (p.target.x - p.x) * Math.max(eased*0.18, 0.02);
-      p.y += (p.target.y - p.y) * Math.max(eased*0.18, 0.02);
-
-      const size = p.hub ? p.r*2.2 : p.r;
-      const alpha = p.hub ? 0.95 : 0.7;
-      ctx.beginPath();
-      ctx.fillStyle = p.hub ? `rgba(255,122,26,${alpha})` : `rgba(232,230,225,${alpha})`;
-      ctx.arc(p.x, p.y, size, 0, Math.PI*2);
-      ctx.fill();
+    // Rotation: zero through BUILD and the chrome hold, then spins during
+    // CHROME_SPIN with an accelerating ease (slow start, fast finish),
+    // and the explosion carries that spin momentum onward as a tumble.
+    let rotation = 0;
+    if(elapsed >= T_CHROMEHOLD_END && elapsed < T_CHROMESPIN_END){
+      const spinT = (elapsed - T_CHROMEHOLD_END) / CHROME_SPIN_DURATION;
+      const eased = spinT * spinT * spinT; // cubic ease-in
+      rotation = eased * Math.PI * 4; // up to 2 full rotations
+    } else if(elapsed >= T_CHROMESPIN_END && elapsed < T_TOPARTICLE_END){
+      rotation = Math.PI * 4;
+    } else if(elapsed >= T_TOPARTICLE_END){
+      const t = (elapsed - T_TOPARTICLE_END) / EXPLODE_DURATION;
+      rotation = Math.PI * 4 + t * Math.PI * 3;
     }
 
-    if(elapsed < BUILD_DURATION + HOLD_DURATION || reduceMotion === false){
-      if(elapsed < BUILD_DURATION + HOLD_DURATION){
-        requestAnimationFrame(frame);
-        return;
+    // ---- Particle layer opacity ----
+    let particleOpacity = 1;
+    if(elapsed >= T_BUILD_END && elapsed < T_TOCHROME_END){
+      particleOpacity = 1 - (elapsed - T_BUILD_END) / TO_CHROME_DURATION;
+    } else if(elapsed >= T_TOCHROME_END && elapsed < T_CHROMESPIN_END){
+      particleOpacity = 0;
+    } else if(elapsed >= T_CHROMESPIN_END && elapsed < T_TOPARTICLE_END){
+      particleOpacity = (elapsed - T_CHROMESPIN_END) / TO_PARTICLE_DURATION;
+    }
+
+    // ---- Solid chrome layer opacity ----
+    let chromeOpacity = 0;
+    if(elapsed >= T_BUILD_END && elapsed < T_TOCHROME_END){
+      chromeOpacity = (elapsed - T_BUILD_END) / TO_CHROME_DURATION;
+    } else if(elapsed >= T_TOCHROME_END && elapsed < T_CHROMESPIN_END){
+      chromeOpacity = 1;
+    } else if(elapsed >= T_CHROMESPIN_END && elapsed < T_TOPARTICLE_END){
+      chromeOpacity = 1 - (elapsed - T_CHROMESPIN_END) / TO_PARTICLE_DURATION;
+    }
+
+    if(chromeOpacity > 0.001){
+      const sweepSpan = T_CHROMESPIN_END - T_TOCHROME_END;
+      const sweepT = Math.min(1, Math.max(0, (elapsed - T_TOCHROME_END) / sweepSpan));
+      drawSolidChrome(rotation, chromeOpacity, sweepT);
+    }
+
+    if(particleOpacity > 0.001){
+      ctx.save();
+      ctx.globalAlpha = particleOpacity;
+      ctx.translate(W/2, H/2);
+      ctx.rotate(rotation);
+      ctx.translate(-W/2, -H/2);
+
+      for(const p of particles){
+        if(elapsed < T_SCATTER_END){
+          p.x += p.vx; p.y += p.vy;
+          if(p.x<0||p.x>W) p.vx*=-1;
+          if(p.y<0||p.y>H) p.vy*=-1;
+        } else if(elapsed < T_BUILD_END){
+          const buildT = (elapsed - T_SCATTER_END) / BUILD_DURATION;
+          const local = Math.min(1, Math.max(0, (buildT - p.delay) / (1 - p.delay)));
+          const eased = 1 - Math.pow(1 - local, 3);
+          p.x += (p.target.x - p.x) * Math.max(eased*0.22, 0.03);
+          p.y += (p.target.y - p.y) * Math.max(eased*0.22, 0.03);
+        } else if(elapsed < T_TOPARTICLE_END){
+          // held in formation through the chrome phases (invisible at times, but in place)
+          p.x = p.target.x; p.y = p.target.y;
+        } else {
+          const expT = Math.min(1, (elapsed - T_TOPARTICLE_END) / EXPLODE_DURATION);
+          const eased = expT * (2 - expT);
+          const tx = p.target.x + p.exX * eased;
+          const ty = p.target.y + p.exY * eased;
+          p.x += (tx - p.x) * 0.28;
+          p.y += (ty - p.y) * 0.28;
+        }
+
+        const exT = elapsed >= T_TOPARTICLE_END ? Math.min(1, (elapsed - T_TOPARTICLE_END) / EXPLODE_DURATION) : 0;
+        const alpha = p.hub ? (0.95 - exT*0.3) : (0.7 - exT*0.25);
+        const fill = p.hub ? `rgba(255,140,40,${Math.max(0,alpha)})` : `rgba(255,255,255,${Math.max(0,alpha)})`;
+        const size = p.hub ? p.r*2.2 : p.r;
+        ctx.beginPath();
+        ctx.fillStyle = fill;
+        ctx.arc(p.x, p.y, size, 0, Math.PI*2);
+        ctx.fill();
       }
+      ctx.restore();
     }
 
-    // fade out
-    const fadeT = Math.min(1, (elapsed - BUILD_DURATION - HOLD_DURATION) / FADE_DURATION);
+    if(elapsed < FADE_START){
+      requestAnimationFrame(frame);
+      return;
+    }
+
+    const fadeT = Math.min(1, (elapsed - FADE_START) / FADE_DURATION);
     overlay.style.opacity = String(1 - fadeT);
     if(fadeT < 1){
       requestAnimationFrame(frame);
@@ -693,10 +847,9 @@
   }
 
   if(reduceMotion){
-    // skip the animated build entirely, just remove the overlay
     overlay.style.display = 'none';
   } else {
-    document.body.style.overflow = 'hidden'; // lock scroll during intro
+    document.body.style.overflow = 'hidden';
     requestAnimationFrame(frame);
   }
 })();
