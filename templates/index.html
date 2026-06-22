@@ -396,11 +396,6 @@
 </head>
 <body>
 
-<!-- INTRO BUILD OVERLAY -->
-<div id="introOverlay" style="position:fixed; inset:0; width:100vw; height:100vh; min-height:100dvh; z-index:500; background:#0a0a0c; display:flex; align-items:center; justify-content:center; transition:opacity 0.6s ease;">
-  <canvas id="introCanvas" style="width:100%; height:100%; display:block;"></canvas>
-</div>
-
 <canvas id="particleCanvas"></canvas>
 
 <!-- NAV -->
@@ -581,145 +576,6 @@
 
 <script>
 /* =========================================================
-   PART 1 — INTRO OVERLAY (simple, ~3.4 seconds total)
-   Black screen -> solid silver chrome "PS × AI" fades in ->
-   holds still, fully readable -> fades out to reveal the site.
-   No particles, no rotation, no explosion.
-   ========================================================= */
-(function(){
-  const overlay = document.getElementById('introOverlay');
-  const canvas = document.getElementById('introCanvas');
-  const ctx = canvas.getContext('2d');
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  let W, H, DPR;
-  function resize(){
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.offsetWidth; H = canvas.offsetHeight;
-    canvas.width = W * DPR; canvas.height = H * DPR;
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  // small, elegant wordmark — not a bold display logo. Sized relative to
-  // screen width so it reads as a refined mark, not a headline.
-  const fontSize = Math.min(W, H) * 0.045;
-  const letterSpacing = fontSize * 0.32; // wide tracking for that refined look
-
-  // Draws text with manual letter-spacing (canvas has no native letter-spacing
-  // for fillText), returning the total rendered width.
-  function drawTrackedText(c, text, x, y, spacing){
-    let widths = [];
-    let total = 0;
-    for(const ch of text){
-      const w = c.measureText(ch).width;
-      widths.push(w);
-      total += w + spacing;
-    }
-    total -= spacing; // no trailing space after the last character
-    let cursor = x - total/2;
-    for(let i=0;i<text.length;i++){
-      c.fillText(text[i], cursor + widths[i]/2, y);
-      cursor += widths[i] + spacing;
-    }
-    return total;
-  }
-
-  // Draws the small chrome wordmark, centered, with a thin underline.
-  function drawSolidChrome(opacity){
-    if(opacity <= 0.001) return;
-
-    // Build the mask first: text + underline together, drawn normally
-    // (white shapes on transparent), so a single destination-in pass
-    // against the gradient clips to BOTH shapes correctly.
-    const mask = document.createElement('canvas');
-    mask.width = W; mask.height = H;
-    const mctx = mask.getContext('2d');
-    mctx.font = `500 ${fontSize}px Inter, -apple-system, sans-serif`;
-    mctx.textAlign = 'center';
-    mctx.textBaseline = 'middle';
-    mctx.fillStyle = '#fff';
-    const textWidth = drawTrackedText(mctx, 'PRESTON SCOTT SYSTEMS', W/2, H/2, letterSpacing);
-
-    const lineY = H/2 + fontSize * 0.85;
-    const lineWidth = textWidth * 0.55;
-    mctx.fillRect(W/2 - lineWidth/2, lineY, lineWidth, Math.max(1, fontSize*0.018));
-
-    const tmp = document.createElement('canvas');
-    tmp.width = W; tmp.height = H;
-    const tctx = tmp.getContext('2d');
-
-    const grad = tctx.createLinearGradient(W*0.32, H*0.42, W*0.68, H*0.58);
-    grad.addColorStop(0.00, '#5a5a5e');
-    grad.addColorStop(0.16, '#8c8c90');
-    grad.addColorStop(0.30, '#c8c8cc');
-    grad.addColorStop(0.38, '#f2f2f4');
-    grad.addColorStop(0.45, '#ffffff');
-    grad.addColorStop(0.55, '#f0f0f2');
-    grad.addColorStop(0.66, '#a8a8ac');
-    grad.addColorStop(0.80, '#7c7c80');
-    grad.addColorStop(0.90, '#b8b8bc');
-    grad.addColorStop(1.00, '#6a6a6e');
-
-    tctx.fillStyle = grad;
-    tctx.fillRect(0,0,W,H);
-    tctx.globalCompositeOperation = 'destination-in';
-    tctx.drawImage(mask, 0, 0);
-
-    ctx.save();
-    ctx.globalAlpha = opacity;
-    ctx.drawImage(tmp, 0, 0);
-    ctx.restore();
-  }
-
-  // ---- Phase timing (ms) ----
-  const FADE_IN_DURATION  = 700;   // chrome fades in
-  const HOLD_DURATION     = 2800;  // holds still, fully readable
-  const FADE_OUT_DURATION = 900;   // overlay fades out, reveals the site
-
-  const T_FADEIN_END = FADE_IN_DURATION;
-  const T_HOLD_END   = T_FADEIN_END + HOLD_DURATION;
-  const FADE_START    = T_HOLD_END;
-
-  const start = performance.now();
-
-  function frame(now){
-    const elapsed = now - start;
-    ctx.clearRect(0,0,W,H);
-
-    let chromeOpacity = 1;
-    if(elapsed < T_FADEIN_END){
-      chromeOpacity = elapsed / FADE_IN_DURATION;
-    }
-    drawSolidChrome(chromeOpacity);
-
-    if(elapsed < FADE_START){
-      requestAnimationFrame(frame);
-      return;
-    }
-
-    const fadeT = Math.min(1, (elapsed - FADE_START) / FADE_OUT_DURATION);
-    overlay.style.opacity = String(1 - fadeT);
-    if(fadeT < 1){
-      requestAnimationFrame(frame);
-    } else {
-      overlay.style.display = 'none';
-      document.body.style.overflow = '';
-      window.__introDone = true;
-    }
-  }
-
-  if(reduceMotion){
-    overlay.style.display = 'none';
-    window.__introDone = true;
-  } else {
-    document.body.style.overflow = 'hidden';
-    requestAnimationFrame(frame);
-  }
-})();
-
-/* =========================================================
    PART 2 — PERSISTENT BACKDROP
    Fixed full-page canvas behind every section. Ambient ASCII-
    network drift everywhere, PLUS a small legible "PS × AI"
@@ -774,7 +630,7 @@ function rebuildLogoTarget(){
 
   const imgData = octx.getImageData(0,0,zw,zh).data;
   const pts = [];
-  const step = Math.max(1, Math.floor(zh/65));
+  const step = Math.max(1, Math.floor(zh/55));
   for(let y=0; y<zh; y+=step){
     for(let x=0; x<zw; x+=step){
       if(imgData[(y*zw+x)*4+3] > 80){
@@ -811,8 +667,8 @@ class LP{
   constructor(i){ this.reset(i); }
   reset(i){
     this.x = Math.random()*W; this.y = Math.random()*H;
-    this.r = Math.random()*0.65 + 0.35;
-    this.hub = Math.random() < 0.025;
+    this.r = Math.random()*0.85 + 0.55;
+    this.hub = Math.random() < 0.03;
     this.hoverPhase = Math.random()*Math.PI*2;
     this.hoverSpeed = 0.4 + Math.random()*0.5;
     this.hoverAmp = 1.0 + Math.random()*1.2;
@@ -838,10 +694,8 @@ let logoPhase = 0;
 
 function step(){
   elapsed += 1;
-  if(window.__introDone){
-    if(!reduceMotion2 && logoPhase < 1) logoPhase = Math.min(1, logoPhase + 0.012);
-    else if(reduceMotion2) logoPhase = 1;
-  }
+  if(!reduceMotion2 && logoPhase < 1) logoPhase = Math.min(1, logoPhase + 0.012);
+  else if(reduceMotion2) logoPhase = 1;
 
   // smooth the scroll value so the scatter/reconstruct feels fluid, not jumpy
   scrollSmooth += (scrollTarget - scrollSmooth) * 0.08;
@@ -884,13 +738,13 @@ function step(){
       p.x += (tx - p.x) * 0.05 * local;
       p.y += (ty - p.y) * 0.05 * local;
     }
-    // else: logoPhase is still 0 (intro hasn't finished yet) — particle
-    // simply isn't drawn at all (see alpha below), no position assigned.
+    // else: logoPhase hasn't started yet (very first frame on page load) —
+    // particle simply isn't drawn yet (see below), no position assigned.
 
-    if(logoPhase <= 0 && !formed) continue; // nothing to draw yet — intro still playing
+    if(logoPhase <= 0 && !formed) continue; // nothing to draw yet, build starts next frame
 
-    const size = p.hub ? p.r*1.7 : p.r;
-    const alpha = (p.hub ? 0.9 : 0.65) * (1 - scatter*0.35);
+    const size = p.hub ? p.r*1.8 : p.r;
+    const alpha = (p.hub ? 0.95 : 0.8) * (1 - scatter*0.35);
     ctx.beginPath();
     ctx.fillStyle = p.hub ? `rgba(255,122,26,${alpha})` : `rgba(232,230,225,${alpha})`;
     ctx.arc(p.x, p.y, size, 0, Math.PI*2);
