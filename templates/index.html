@@ -610,13 +610,28 @@ window.addEventListener('scroll', onScroll, { passive: true });
 onScroll();
 
 // ---- Logo target positions, sized + placed to match #heroLogoZone exactly ----
+// IMPORTANT: the canvas is position:fixed (covers the same screen area
+// regardless of scroll), but #heroLogoZone scrolls normally with the page.
+// getBoundingClientRect() returns viewport-relative coordinates, which only
+// line up with the fixed canvas at the scroll position that existed at
+// calculation time. To make this robust no matter when it's called (e.g. a
+// mobile browser's address-bar collapse firing a resize mid-scroll), we
+// store the target in PAGE coordinates (adding current scrollY) and convert
+// back to viewport-relative coordinates fresh every frame in the render loop.
 let logoTargets = [];
+let logoZonePageTop = 0, logoZonePageLeft = 0;
+
 function rebuildLogoTarget(){
   const zone = document.getElementById('heroLogoZone');
   if(!zone){ logoTargets = []; return; }
   const rect = zone.getBoundingClientRect();
   const zw = Math.max(1, Math.round(rect.width));
   const zh = Math.max(1, Math.round(rect.height));
+
+  // store the zone's position in PAGE coordinates (independent of scroll
+  // position at the moment this function happens to run)
+  logoZonePageLeft = rect.left + window.scrollX;
+  logoZonePageTop = rect.top + window.scrollY;
 
   const off = document.createElement('canvas');
   off.width = zw; off.height = zh;
@@ -634,8 +649,9 @@ function rebuildLogoTarget(){
   for(let y=0; y<zh; y+=step){
     for(let x=0; x<zw; x+=step){
       if(imgData[(y*zw+x)*4+3] > 80){
-        // convert to page coordinates (rect is viewport-relative; canvas covers viewport too)
-        pts.push({x: rect.left + x, y: rect.top + y});
+        // store in PAGE coordinates (offset from zone's page position),
+        // converted to viewport-relative fresh every frame in step()
+        pts.push({pageX: logoZonePageLeft + x, pageY: logoZonePageTop + y});
       }
     }
   }
@@ -673,11 +689,16 @@ class LP{
     this.hoverSpeed = 0.4 + Math.random()*0.5;
     this.hoverAmp = 1.0 + Math.random()*1.2;
     this.delay = Math.random()*0.3;
-    // scatter vector: where this particle flies as scroll deconstructs the logo
-    const ang = Math.random()*Math.PI*2;
-    const dist = 60 + Math.random()*220;
+    // scatter vector: explodes DOWNWARD as scroll deconstructs the logo —
+    // angle constrained to roughly straight-down with some spread, not a
+    // full 360° random scatter, plus extra horizontal drift for a wider,
+    // more natural-looking "falling apart" spread
+    const downAngle = Math.PI/2; // straight down in standard canvas coords
+    const spread = (Math.random()-0.5) * (Math.PI*0.7); // ~63° either side
+    const ang = downAngle + spread;
+    const dist = 180 + Math.random()*420; // far enough to clear off-screen
     this.scatterX = Math.cos(ang)*dist;
-    this.scatterY = Math.sin(ang)*dist;
+    this.scatterY = Math.abs(Math.sin(ang)*dist) + Math.random()*120; // always net-downward
   }
 }
 let logoParticles = [];
@@ -721,7 +742,13 @@ function step(){
   const formed = logoPhase > 0.96;
   for(let i=0;i<logoParticles.length;i++){
     const p = logoParticles[i];
-    const home = logoTargets[i] || {x:W/2,y:H/2};
+    const t = logoTargets[i];
+    // convert stored PAGE coordinates to current viewport-relative coordinates
+    // fresh every frame — this is what makes it correct regardless of when
+    // rebuildLogoTarget() last ran relative to scroll position
+    const home = t
+      ? { x: t.pageX - window.scrollX, y: t.pageY - window.scrollY }
+      : { x: W/2, y: H/2 };
     const local = Math.min(1, Math.max(0,(logoPhase-p.delay)/(1-p.delay)));
 
     if(formed){
