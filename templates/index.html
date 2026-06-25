@@ -1,3 +1,9 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Preston Scott — Websites & AI Integration</title>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7C8427PHMC"></script>
 <script>
@@ -6,3 +12,791 @@
   gtag('js', new Date());
   gtag('config', 'G-7C8427PHMC');
 </script>
+<style>
+  :root{
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-7C8427PHMC');
+</script>
+  <style>
+  :root{
+    --bg:#0a0a0c;
+    --panel:#13131600;
+    --ink:#e8e6e1;
+    --ink-dim:#8a8a86;
+    --orange:#ff7a1a;
+    --orange-deep:#d65e00;
+    --steel:#3a3a3e;
+    --line: rgba(232,230,225,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{overflow-x:hidden; scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', -apple-system, 'Segoe UI', sans-serif;
+    overflow-x:hidden;
+    width:100%;
+    position:relative;
+  }
+  nav, .hero, .ethos, .process, .specs, .cta, footer, .menu-overlay{
+    position:relative;
+    z-index:1;
+  }
+  ::selection{ background:var(--orange); color:#0a0a0c; }
+
+  .mono{
+    font-family: ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+
+  /* ===== NAV ===== */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 36px;
+    background:rgba(10,10,12,0.55);
+    backdrop-filter: blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-left{ display:flex; align-items:center; gap:22px; }
+  .logo{
+    font-weight:800; font-size:18px; letter-spacing:-0.02em;
+    color:var(--ink);
+  }
+  .logo span{ color:var(--orange); }
+  .nav-tag{
+    font-size:10px; color:var(--ink-dim);
+    border:1px solid var(--line); border-radius:20px;
+    padding:3px 10px;
+  }
+  .nav-links{
+    display:flex; gap:34px; align-items:center;
+  }
+  .nav-links a{
+    font-size:11px; color:var(--ink-dim); text-decoration:none;
+    display:flex; gap:7px; align-items:center;
+    transition:color .25s;
+  }
+  .nav-links a:hover{ color:var(--ink); }
+  .nav-links a .num{ color:var(--steel); }
+  .nav-cta{
+    background:var(--orange); color:#0a0a0c;
+    font-size:12px; font-weight:700;
+    padding:10px 20px; border-radius:6px;
+    text-decoration:none;
+    display:flex; align-items:center; gap:8px;
+    transition:transform .2s, background .2s;
+  }
+  .nav-cta:hover{ background:#ff8d3c; transform:translateY(-1px); }
+  .burger{
+    width:34px; height:18px; position:relative; cursor:pointer;
+  }
+  .burger span{
+    position:absolute; left:0; right:0; height:1px; background:var(--ink);
+  }
+  .burger span:nth-child(1){ top:0; }
+  .burger span:nth-child(2){ top:8px; width:70%; }
+  .burger span:nth-child(3){ top:16px; }
+  @media (max-width:880px){ .nav-links{ display:none; } }
+  @media (max-width:600px){
+    nav{ padding:14px 18px; }
+    .nav-tag{ display:none; }
+    .nav-cta{ padding:9px 14px; font-size:11px; }
+    .nav-cta{ white-space:nowrap; }
+  }
+  @media (max-width:380px){
+    .cta-label{ display:none; }
+    .nav-cta{ font-size:16px; padding:9px 14px; }
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    position:relative;
+    height:100vh;
+    width:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    overflow:hidden;
+  }
+  #particleCanvas{
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    display:block;
+    z-index:0;
+    pointer-events:none;
+  }
+  .hero-glow{
+    position:absolute; inset:0;
+    background: radial-gradient(circle at 50% 45%, rgba(255,122,26,0.10), transparent 60%);
+    pointer-events:none;
+  }
+  .hero-content{
+    position:relative; z-index:5;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .eyebrow{
+    font-size:11px; color:var(--orange);
+    margin-bottom:22px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before, .eyebrow::after{
+    content:''; width:24px; height:1px; background:var(--orange-deep);
+  }
+  .hero h1{
+    font-size:clamp(54px, 11vw, 148px);
+    font-weight:800;
+    letter-spacing:-0.045em;
+    line-height:0.92;
+    color:var(--ink);
+  }
+  .hero h1 em{
+    font-style:normal; color:var(--orange);
+  }
+  .hero-sub{
+    margin-top:26px;
+    max-width:560px;
+    font-size:15px;
+    line-height:1.7;
+    color:var(--ink-dim);
+    padding:0 24px;
+  }
+  .hero-arrow{
+    margin-top:50px;
+    width:46px; height:46px; border-radius:50%;
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--orange);
+    animation: bob 2.2s ease-in-out infinite;
+  }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(8px);} }
+
+  .hero-footer{
+    position:absolute; bottom:30px; left:0; right:0; z-index:5;
+    display:flex; justify-content:space-between;
+    padding:0 36px;
+  }
+  .pill{
+    font-size:10px; color:var(--ink-dim);
+    border:1px solid var(--line); border-radius:20px;
+    padding:7px 16px;
+  }
+  @media (max-width:600px){
+    .hero-footer{ padding:0 18px; }
+    .pill{ font-size:9px; padding:6px 11px; }
+  }
+  @media (max-width:380px){
+    .hero-footer .pill:nth-child(3){ display:none; }
+  }
+
+  /* ===== ETHOS (inverted orange band) ===== */
+  .ethos{
+    background:var(--orange);
+    color:#1a0d00;
+    position:relative;
+    padding:130px 8vw 150px;
+    overflow:hidden;
+  }
+  .ethos::before{
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0 1px, transparent 1px 90px),
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0 1px, transparent 1px 90px);
+    pointer-events:none;
+  }
+  .ethos-tag{
+    text-align:center; font-size:11px; color:rgba(20,10,0,0.55);
+    margin-bottom:70px; display:flex; justify-content:center; gap:8px; align-items:center;
+  }
+  .ethos-grid{
+    position:relative; z-index:2;
+    display:grid;
+    grid-template-columns: 1fr 1.4fr 1fr;
+    gap:40px;
+    align-items:center;
+  }
+  .ethos-side{
+    display:flex; flex-direction:column; gap:50px;
+  }
+  .ethos-side.right{ align-items:flex-end; text-align:right; }
+  .ethos-label{
+    font-size:11px; display:flex; align-items:center; gap:8px;
+    color:rgba(20,10,0,0.6);
+  }
+  .ethos-side.right .ethos-label{ flex-direction:row-reverse; }
+  .ethos-center{
+    text-align:center;
+  }
+  .ethos-word{
+    font-size:clamp(38px,5.4vw,72px);
+    font-weight:800; letter-spacing:-0.03em; line-height:0.95;
+    display:flex; justify-content:center; align-items:baseline; gap:0.25em;
+  }
+  .ethos-word .serif{
+    font-weight:400; font-style:italic;
+  }
+  .ethos-copy{
+    margin-top:36px;
+    font-size:13.5px; line-height:1.85;
+    color:rgba(20,10,0,0.78);
+    max-width:480px; margin-left:auto; margin-right:auto;
+  }
+  .ethos-copy p{ margin-bottom:16px; }
+  .ethos-foot{
+    margin-top:40px;
+    display:flex; justify-content:center; gap:30px;
+    font-size:11px; color:rgba(20,10,0,0.6);
+  }
+  @media (max-width:880px){
+    .ethos-grid{ grid-template-columns:1fr; }
+    .ethos-side{ flex-direction:row; justify-content:space-between; }
+    .ethos-side.right{ align-items:flex-start; text-align:left; }
+  }
+
+  /* ===== PROCESS (dark, monochrome-style imagery via CSS) ===== */
+  .process{
+    background:rgba(10,10,12,0.92);
+    padding:130px 8vw;
+    border-bottom:1px solid var(--line);
+  }
+  .process-head{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    margin-bottom:70px; flex-wrap:wrap; gap:20px;
+  }
+  .process-head h2{
+    font-size:clamp(32px,5vw,56px);
+    font-weight:800; letter-spacing:-0.03em;
+  }
+  .process-head .mono{ font-size:11px; color:var(--ink-dim); }
+  .process-track{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .pcard{
+    background:#0e0e11;
+    padding:34px 28px 28px;
+    min-height:300px;
+    position:relative;
+    display:flex; flex-direction:column; justify-content:space-between;
+    transition:background .3s;
+  }
+  .pcard:hover{ background:#151518; }
+  .pcard .pnum{ font-size:11px; color:var(--orange); }
+  .pcard h3{
+    font-size:22px; font-weight:700; margin-top:60px; letter-spacing:-0.01em;
+  }
+  .pcard p{
+    font-size:13px; color:var(--ink-dim); line-height:1.6; margin-top:10px;
+  }
+  .pcard .glyph{
+    position:absolute; top:30px; right:28px;
+    width:38px; height:38px;
+    border:1px solid var(--line); border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .glyph svg{ width:18px; height:18px; stroke:var(--orange); fill:none; stroke-width:1.6; }
+  @media (max-width:880px){ .process-track{ grid-template-columns:1fr; } }
+
+  /* ===== SPECS / SERVICES ===== */
+  .specs{
+    background:rgba(10,10,12,0.92);
+    padding:130px 8vw;
+  }
+  .specs-head{ margin-bottom:60px; }
+  .specs-head .mono{ font-size:11px; color:var(--orange); margin-bottom:18px; display:block; }
+  .specs-head h2{
+    font-size:clamp(32px,5vw,56px); font-weight:800; letter-spacing:-0.03em; max-width:680px;
+  }
+  .spec-row{
+    display:grid;
+    grid-template-columns: 70px 1fr 1fr 160px;
+    align-items:center;
+    padding:30px 0;
+    border-top:1px solid var(--line);
+    gap:24px;
+  }
+  .spec-row:last-child{ border-bottom:1px solid var(--line); }
+  .spec-row .si{ font-size:11px; color:var(--ink-dim); }
+  .spec-row h4{ font-size:20px; font-weight:700; letter-spacing:-0.01em; }
+  .spec-row p{ font-size:13px; color:var(--ink-dim); line-height:1.6; }
+  .spec-row .price{ text-align:right; font-size:15px; font-weight:700; color:var(--orange); }
+  .spec-row .price small{ display:block; font-weight:400; color:var(--ink-dim); font-size:11px; margin-top:4px; }
+  @media (max-width:880px){
+    .spec-row{ grid-template-columns:1fr; gap:8px; padding:26px 0; }
+    .spec-row .price{ text-align:left; }
+  }
+
+  /* ===== CTA / FOOTER ===== */
+  .cta{
+    background:rgba(10,10,12,0.92);
+    padding:160px 8vw 100px;
+    text-align:center;
+    border-top:1px solid var(--line);
+  }
+  .cta .mono{ font-size:11px; color:var(--ink-dim); margin-bottom:24px; display:block; }
+  .cta h2{
+    font-size:clamp(36px,7vw,84px);
+    font-weight:800; letter-spacing:-0.03em; line-height:0.96;
+  }
+  .cta h2 span{ color:var(--orange); }
+  .cta-btn{
+    display:inline-flex; align-items:center; gap:10px;
+    margin-top:46px;
+    background:var(--orange); color:#0a0a0c;
+    font-weight:700; font-size:14px;
+    padding:18px 36px; border-radius:8px;
+    text-decoration:none;
+    transition:transform .2s, background .2s;
+  }
+  .cta-btn:hover{ background:#ff8d3c; transform:translateY(-2px); }
+
+  footer{
+    padding:50px 8vw 36px;
+    display:flex; justify-content:space-between; align-items:center;
+    border-top:1px solid var(--line);
+    flex-wrap:wrap; gap:16px;
+  }
+  footer .mono{ font-size:10.5px; color:var(--ink-dim); }
+  footer .flinks{ display:flex; gap:26px; }
+  footer .flinks a{ color:var(--ink-dim); text-decoration:none; font-size:10.5px; }
+  footer .flinks a:hover{ color:var(--orange); }
+
+  /* ===== MENU OVERLAY ===== */
+  .menu-overlay{
+    position:fixed; inset:0; z-index:200;
+    background:rgba(232,230,225,0.97);
+    color:#0a0a0c;
+    display:none;
+    flex-direction:column;
+    padding:90px 8vw 60px;
+  }
+  .menu-overlay.open{ display:flex; }
+  .menu-close{
+    position:absolute; top:24px; right:36px;
+    font-size:22px; cursor:pointer; background:none; border:none; color:#0a0a0c;
+  }
+  .menu-grid{
+    display:grid; grid-template-columns: 1.3fr 1fr 1fr; gap:60px; flex:1;
+  }
+  .menu-col .mono{ font-size:10px; color:#7a7a76; margin-bottom:22px; display:block; }
+  .menu-link{
+    font-size:clamp(28px,4vw,46px); font-weight:700; letter-spacing:-0.02em;
+    display:flex; align-items:center; gap:14px; margin-bottom:10px;
+    text-decoration:none; color:#0a0a0c;
+  }
+  .menu-link:hover{ color:var(--orange-deep); }
+  .menu-sub a{
+    display:block; font-size:13px; color:#3a3a3a; text-decoration:none;
+    padding:10px 0; border-top:1px solid rgba(10,10,12,0.1);
+  }
+  .menu-sub a:hover{ color:var(--orange-deep); }
+  @media (max-width:880px){ .menu-grid{ grid-template-columns:1fr; gap:36px; } }  @media (max-width:600px){
+    .ethos{ padding:80px 6vw 100px; }
+    .process{ padding:80px 6vw; }
+    .specs{ padding:80px 6vw; }
+    .cta{ padding:110px 6vw 70px; }
+    .ethos-tag{ margin-bottom:44px; }
+    .process-head{ margin-bottom:44px; }
+    .specs-head{ margin-bottom:40px; }
+  }  @media (max-width:600px){
+    .menu-overlay{ padding:80px 6vw 40px; }
+    .menu-close{ top:18px; right:22px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particleCanvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <div class="logo">PS<span>×</span>AI</div>
+    <div class="nav-tag mono">Oklahoma</div>
+  </div>
+  <div class="nav-links mono">
+    <a href="#ethos"><span class="num">1.0</span>Approach</a>
+    <a href="#process"><span class="num">2.0</span>Build</a>
+    <a href="#specs"><span class="num">3.0</span>Services</a>
+    <a href="#contact"><span class="num">4.0</span>Start</a>
+  </div>
+  <div style="display:flex; align-items:center; gap:18px;">
+    <a class="nav-cta" href="#contact">+ <span class="cta-label">Free Strategy Call</span></a>
+    <div class="burger" onclick="document.getElementById('menu').classList.add('open')">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="eyebrow mono">Websites & AI Systems</div>
+    <h1>BUILT<br>TO <em>RUN</em></h1>
+    <div id="heroLogoZone" style="width:100%; max-width:480px; height:90px; margin:6px auto 0;"></div>
+    <p class="hero-sub">Custom websites and practical AI tools for small businesses across Oklahoma. Less manual follow-up. More booked jobs. Systems that work while you're on the job site.</p>
+    <a href="#process" style="text-decoration:none;">
+      <div class="hero-arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16M5 13l7 7 7-7"/></svg>
+      </div>
+    </a>
+  </div>
+  <div class="hero-footer mono">
+    <div class="pill">Web Design</div>
+    <div class="pill">AI Integration</div>
+    <div class="pill">Automation</div>
+  </div>
+</section>
+
+<!-- ETHOS -->
+<section class="ethos" id="ethos">
+  <div style="text-align:center; font-size:12px; letter-spacing:0.18em; color:rgba(20,10,0,0.45); font-weight:700; margin-bottom:14px; position:relative; z-index:2;" class="mono">PRESTON SCOTT SYSTEMS</div>
+  <div class="ethos-tag mono">✦ &nbsp;Why it's built this way&nbsp; ✦</div>
+  <div class="ethos-grid">
+    <div class="ethos-side">
+      <div class="ethos-label mono">✦ Local First</div>
+      <div class="ethos-label mono">✦ Owner-Run</div>
+      <div class="ethos-label mono">✦ Flat Pricing</div>
+    </div>
+    <div class="ethos-center">
+      <div class="ethos-word"><span class="serif">Our</span><span>Approach</span></div>
+      <div class="ethos-copy">
+        <p>Most small businesses lose customers to slow follow-up, not bad work. The fix isn't more software — it's the right system, built once and run quietly in the background.</p>
+        <p>Every site is built fast, mobile-first, and tied to a real AI tool when it's useful: one that answers questions, logs jobs, or tells the owner exactly who's on the schedule this week.</p>
+        <p>No subscriptions you don't understand. No features you didn't ask for. One flat price, one working system, delivered by one person who answers the phone.</p>
+      </div>
+      <div class="ethos-foot mono">
+        <span>Web Design</span><span>AI Tools</span><span>Automation</span>
+      </div>
+    </div>
+    <div class="ethos-side right">
+      <div class="ethos-label mono">Direct Build ✦</div>
+      <div class="ethos-label mono">No Bloat ✦</div>
+      <div class="ethos-label mono">Fast Turnaround ✦</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process" id="process">
+  <div class="process-head">
+    <h2>How a build<br>comes together.</h2>
+    <div class="mono">2.0 — Build Process</div>
+  </div>
+  <div class="process-track">
+    <div class="pcard">
+      <div class="pnum mono">01 / Discover</div>
+      <div class="glyph"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+      <h3>Discovery Call</h3>
+      <p>A short conversation about how the business actually runs day to day — what's slow, what gets missed, what a win looks like.</p>
+    </div>
+    <div class="pcard">
+      <div class="pnum mono">02 / Design</div>
+      <div class="glyph"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+      <h3>Site & System Design</h3>
+      <p>A clean, fast site built around the services that actually bring in revenue — plus an AI tool scoped to one real problem, not a feature list.</p>
+    </div>
+    <div class="pcard">
+      <div class="pnum mono">03 / Launch</div>
+      <div class="glyph"><svg viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></div>
+      <h3>Launch & Hand-Off</h3>
+      <p>Deployed, tested on a real phone, and handed over with a plain-English walkthrough — not a manual you'll never read.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SPECS / SERVICES -->
+<section class="specs" id="specs">
+  <div class="specs-head">
+    <span class="mono">3.0 — Services</span>
+    <h2>One person, three ways to fix what's slow.</h2>
+  </div>
+
+  <div class="spec-row">
+    <div class="si mono">01</div>
+    <div><h4>Website Design & Development</h4></div>
+    <p>Custom, mobile-friendly websites built to load fast and turn visitors into booked customers.</p>
+    <div class="price">From $400<small>flat, one-time</small></div>
+  </div>
+
+  <div class="spec-row">
+    <div class="si mono">02</div>
+    <div><h4>AI Chat Assistants</h4></div>
+    <p>On-brand chat tools that answer customer questions and capture leads around the clock — even after hours.</p>
+    <div class="price">Custom<small>scoped to your site</small></div>
+  </div>
+
+  <div class="spec-row">
+    <div class="si mono">03</div>
+    <div><h4>Internal AI & Booking Automation</h4></div>
+    <p>Private, login-protected tools for the owner — log jobs, track customers, and ask "who's on my schedule this week."</p>
+    <div class="price">$450<small>50% deposit to start</small></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="contact">
+  <span class="mono">4.0 — Start a Project</span>
+  <h2>Let's build your <span>system.</span></h2>
+  <a class="cta-btn" href="mailto:prestondarnell46@gmail.com">
+    + Get a Free Strategy Call
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+  </a>
+</section>
+
+<footer>
+  <div class="mono">Preston Scott · Websites & AI Integration · Oklahoma</div>
+  <div class="flinks mono">
+    <a href="#ethos">Approach</a>
+    <a href="#specs">Services</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+<!-- MENU OVERLAY -->
+<div class="menu-overlay" id="menu">
+  <button class="menu-close" onclick="document.getElementById('menu').classList.remove('open')">✕</button>
+  <div class="menu-grid">
+    <div class="menu-col">
+      <span class="mono">Menu</span>
+      <a class="menu-link" href="#ethos" onclick="document.getElementById('menu').classList.remove('open')">Approach →</a>
+      <a class="menu-link" href="#process" onclick="document.getElementById('menu').classList.remove('open')">Build Process →</a>
+      <a class="menu-link" href="#specs" onclick="document.getElementById('menu').classList.remove('open')">Services →</a>
+    </div>
+    <div class="menu-col">
+      <span class="mono">Quick Links</span>
+      <div class="menu-sub">
+        <a href="#contact">Start a Project</a>
+        <a href="#process">How It Works</a>
+        <a href="mailto:prestondarnell46@gmail.com">Contact</a>
+      </div>
+    </div>
+    <div class="menu-col">
+      <span class="mono">Based In</span>
+      <div class="menu-sub">
+        <a href="#">Pryor, OK</a>
+        <a href="#">Chouteau, OK</a>
+        <a href="#">Inola, OK</a>
+        <a href="#">Tulsa Metro</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   PART 2 — PERSISTENT BACKDROP
+   Fixed full-page canvas behind every section. Ambient ASCII-
+   network drift everywhere, PLUS a small legible "PS × AI"
+   logo trace held in place directly under the hero headline
+   (positioned to match #heroLogoZone). Whole thing rotates
+   gently with scroll.
+   ========================================================= */
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, DPR;
+function resize(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = canvas.offsetWidth; H = canvas.offsetHeight;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', ()=>{ resize(); rebuildLogoTarget(); });
+resize();
+
+const reduceMotion2 = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---- Scroll-reactive deconstruct/reconstruct ----
+// Scatter amount ramps from 0 to 1 over the first ~1.1 viewport-heights of
+// scroll, then stays fully scattered beyond that. Scrolling back reverses it.
+let scrollTarget = 0;
+let scrollSmooth = 0;
+function onScroll(){
+  const span = window.innerHeight * 1.1;
+  scrollTarget = Math.min(1, Math.max(0, window.scrollY / span));
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+// ---- Logo target positions, sized + placed to match #heroLogoZone exactly ----
+// IMPORTANT: the canvas is position:fixed (covers the same screen area
+// regardless of scroll), but #heroLogoZone scrolls normally with the page.
+// getBoundingClientRect() returns viewport-relative coordinates, which only
+// line up with the fixed canvas at the scroll position that existed at
+// calculation time. To make this robust no matter when it's called (e.g. a
+// mobile browser's address-bar collapse firing a resize mid-scroll), we
+// store the target in PAGE coordinates (adding current scrollY) and convert
+// back to viewport-relative coordinates fresh every frame in the render loop.
+let logoTargets = [];
+let logoZonePageTop = 0, logoZonePageLeft = 0;
+
+function rebuildLogoTarget(){
+  const zone = document.getElementById('heroLogoZone');
+  if(!zone){ logoTargets = []; return; }
+  const rect = zone.getBoundingClientRect();
+  const zw = Math.max(1, Math.round(rect.width));
+  const zh = Math.max(1, Math.round(rect.height));
+
+  // store the zone's position in PAGE coordinates (independent of scroll
+  // position at the moment this function happens to run)
+  logoZonePageLeft = rect.left + window.scrollX;
+  logoZonePageTop = rect.top + window.scrollY;
+
+  const off = document.createElement('canvas');
+  off.width = zw; off.height = zh;
+  const octx = off.getContext('2d');
+  const fontSize = zh * 0.78;
+  octx.fillStyle = '#fff';
+  octx.font = `800 ${fontSize}px Inter, -apple-system, sans-serif`;
+  octx.textAlign = 'center';
+  octx.textBaseline = 'middle';
+  octx.fillText('PS × AI', zw/2, zh/2);
+
+  const imgData = octx.getImageData(0,0,zw,zh).data;
+  const pts = [];
+  const step = Math.max(1, Math.floor(zh/55));
+  for(let y=0; y<zh; y+=step){
+    for(let x=0; x<zw; x+=step){
+      if(imgData[(y*zw+x)*4+3] > 80){
+        // store in PAGE coordinates (offset from zone's page position),
+        // converted to viewport-relative fresh every frame in step()
+        pts.push({pageX: logoZonePageLeft + x, pageY: logoZonePageTop + y});
+      }
+    }
+  }
+  for(let i=pts.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [pts[i],pts[j]] = [pts[j],pts[i]];
+  }
+  logoTargets = pts;
+}
+
+const AMBIENT_COUNT = window.innerWidth < 700 ? 70 : 130;
+let ambient = [];
+class A{
+  constructor(){
+    this.homeX = Math.random()*W; this.homeY = Math.random()*H;
+    this.x = this.homeX; this.y = this.homeY;
+    this.r = Math.random()*1.2 + 0.4;
+    // scatter vector: direction + distance this particle flies outward as scroll increases
+    const ang = Math.random()*Math.PI*2;
+    const dist = 80 + Math.random()*260;
+    this.scatterX = Math.cos(ang)*dist;
+    this.scatterY = Math.sin(ang)*dist;
+    this.spin = (Math.random()-0.5)*0.01; // tiny independent rotation while scattered
+  }
+}
+ambient = Array.from({length:AMBIENT_COUNT}, ()=> new A());
+
+class LP{
+  constructor(i){ this.reset(i); }
+  reset(i){
+    this.x = Math.random()*W; this.y = Math.random()*H;
+    this.r = Math.random()*0.85 + 0.55;
+    this.hub = Math.random() < 0.03;
+    this.hoverPhase = Math.random()*Math.PI*2;
+    this.hoverSpeed = 0.4 + Math.random()*0.5;
+    this.hoverAmp = 1.0 + Math.random()*1.2;
+    this.delay = Math.random()*0.3;
+    // scatter vector: explodes DOWNWARD as scroll deconstructs the logo —
+    // angle constrained to roughly straight-down with some spread, not a
+    // full 360° random scatter, plus extra horizontal drift for a wider,
+    // more natural-looking "falling apart" spread
+    const downAngle = Math.PI/2; // straight down in standard canvas coords
+    const spread = (Math.random()-0.5) * (Math.PI*0.7); // ~63° either side
+    const ang = downAngle + spread;
+    const dist = 180 + Math.random()*420; // far enough to clear off-screen
+    this.scatterX = Math.cos(ang)*dist;
+    this.scatterY = Math.abs(Math.sin(ang)*dist) + Math.random()*120; // always net-downward
+  }
+}
+let logoParticles = [];
+function rebuildLogoParticles(){
+  rebuildLogoTarget();
+  logoParticles = Array.from({length: Math.max(logoTargets.length, 1)}, (_,i)=> new LP(i));
+}
+// build once layout has settled
+setTimeout(rebuildLogoParticles, 50);
+window.addEventListener('load', rebuildLogoParticles);
+
+let elapsed = 0;
+let logoPhase = 0;
+
+function step(){
+  elapsed += 1;
+  if(!reduceMotion2 && logoPhase < 1) logoPhase = Math.min(1, logoPhase + 0.012);
+  else if(reduceMotion2) logoPhase = 1;
+
+  // smooth the scroll value so the scatter/reconstruct feels fluid, not jumpy
+  scrollSmooth += (scrollTarget - scrollSmooth) * 0.08;
+  const scatter = scrollSmooth; // 0 = fully formed, 1 = fully scattered
+
+  ctx.clearRect(0,0,W,H);
+
+  // ambient field — drifts apart from its grid-like home position as you scroll,
+  // reassembles as you scroll back up. Fully reversible, position-driven.
+  for(const p of ambient){
+    const tx = p.homeX + p.scatterX * scatter;
+    const ty = p.homeY + p.scatterY * scatter;
+    p.x += (tx - p.x) * 0.12;
+    p.y += (ty - p.y) * 0.12;
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(232,230,225,${0.30 - scatter*0.10})`;
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  // hero logo — deconstructs outward along each particle's scatter vector as you
+  // scroll down, reconstructs back into "PS × AI" as you scroll back up.
+  const formed = logoPhase > 0.96;
+  for(let i=0;i<logoParticles.length;i++){
+    const p = logoParticles[i];
+    const t = logoTargets[i];
+    // convert stored PAGE coordinates to current viewport-relative coordinates
+    // fresh every frame — this is what makes it correct regardless of when
+    // rebuildLogoTarget() last ran relative to scroll position
+    const home = t
+      ? { x: t.pageX - window.scrollX, y: t.pageY - window.scrollY }
+      : { x: W/2, y: H/2 };
+    const local = Math.min(1, Math.max(0,(logoPhase-p.delay)/(1-p.delay)));
+
+    if(formed){
+      const hx = Math.cos(elapsed*0.02*p.hoverSpeed + p.hoverPhase) * p.hoverAmp * (1-scatter*0.6);
+      const hy = Math.sin(elapsed*0.018*p.hoverSpeed + p.hoverPhase) * p.hoverAmp * (1-scatter*0.6);
+      const tx = home.x + p.scatterX * scatter + hx;
+      const ty = home.y + p.scatterY * scatter + hy;
+      p.x += (tx - p.x) * 0.10;
+      p.y += (ty - p.y) * 0.10;
+    } else if(logoPhase > 0 && local > 0){
+      if(p.x === undefined){ p.x = home.x; p.y = home.y; }
+      const tx = home.x + p.scatterX * scatter;
+      const ty = home.y + p.scatterY * scatter;
+      p.x += (tx - p.x) * 0.05 * local;
+      p.y += (ty - p.y) * 0.05 * local;
+    }
+    // else: logoPhase hasn't started yet (very first frame on page load) —
+    // particle simply isn't drawn yet (see below), no position assigned.
+
+    if(logoPhase <= 0 && !formed) continue; // nothing to draw yet, build starts next frame
+
+    const size = p.hub ? p.r*1.8 : p.r;
+    const alpha = (p.hub ? 0.95 : 0.8) * (1 - scatter*0.35);
+    ctx.beginPath();
+    ctx.fillStyle = p.hub ? `rgba(255,122,26,${alpha})` : `rgba(232,230,225,${alpha})`;
+    ctx.arc(p.x, p.y, size, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  requestAnimationFrame(step);
+}
+step();
+</script>
+
+</body>
+</html>
