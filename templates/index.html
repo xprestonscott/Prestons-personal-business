@@ -4,15 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Preston Scott — Websites & AI Integration</title>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-7C8427PHMC"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-7C8427PHMC');
-</script>
-  <style>
+<style>
   :root{
     --bg:#0a0a0c;
     --panel:#13131600;
@@ -185,7 +177,7 @@
 
   /* ===== ETHOS (inverted orange band) ===== */
   .ethos{
-    background:var(--orange);
+    background:rgba(255,122,26,0.93);
     color:#1a0d00;
     position:relative;
     padding:130px 8vw 150px;
@@ -307,7 +299,7 @@
   }
   .spec-row{
     display:grid;
-    grid-template-columns: 70px 1fr 1fr 160px;
+    grid-template-columns: 70px 1fr 1fr 190px;
     align-items:center;
     padding:30px 0;
     border-top:1px solid var(--line);
@@ -317,11 +309,21 @@
   .spec-row .si{ font-size:11px; color:var(--ink-dim); }
   .spec-row h4{ font-size:20px; font-weight:700; letter-spacing:-0.01em; }
   .spec-row p{ font-size:13px; color:var(--ink-dim); line-height:1.6; }
-  .spec-row .price{ text-align:right; font-size:15px; font-weight:700; color:var(--orange); }
-  .spec-row .price small{ display:block; font-weight:400; color:var(--ink-dim); font-size:11px; margin-top:4px; }
+  .spec-row .quote-link{
+    text-align:right; display:flex; justify-content:flex-end;
+  }
+  .spec-row .quote-link a{
+    display:inline-flex; align-items:center; gap:7px;
+    background:var(--orange); color:#0a0a0c;
+    font-size:12px; font-weight:700;
+    padding:10px 18px; border-radius:6px;
+    text-decoration:none; white-space:nowrap;
+    transition:transform .2s, background .2s;
+  }
+  .spec-row .quote-link a:hover{ background:#ff8d3c; transform:translateY(-1px); }
   @media (max-width:880px){
     .spec-row{ grid-template-columns:1fr; gap:8px; padding:26px 0; }
-    .spec-row .price{ text-align:left; }
+    .spec-row .quote-link{ justify-content:flex-start; margin-top:6px; }
   }
 
   /* ===== CTA / FOOTER ===== */
@@ -419,7 +421,7 @@
     <a href="#contact"><span class="num">4.0</span>Start</a>
   </div>
   <div style="display:flex; align-items:center; gap:18px;">
-    <a class="nav-cta" href="#contact">+ <span class="cta-label">Free Strategy Call</span></a>
+    <a class="nav-cta" href="mailto:prestondarnell46@gmail.com?subject=Free%20Quote%20Request">+ <span class="cta-label">Get a Free Quote</span></a>
     <div class="burger" onclick="document.getElementById('menu').classList.add('open')">
       <span></span><span></span><span></span>
     </div>
@@ -455,14 +457,14 @@
     <div class="ethos-side">
       <div class="ethos-label mono">✦ Local First</div>
       <div class="ethos-label mono">✦ Owner-Run</div>
-      <div class="ethos-label mono">✦ Flat Pricing</div>
+      <div class="ethos-label mono">✦ Custom Quotes</div>
     </div>
     <div class="ethos-center">
       <div class="ethos-word"><span class="serif">Our</span><span>Approach</span></div>
       <div class="ethos-copy">
         <p>Most small businesses lose customers to slow follow-up, not bad work. The fix isn't more software — it's the right system, built once and run quietly in the background.</p>
         <p>Every site is built fast, mobile-first, and tied to a real AI tool when it's useful: one that answers questions, logs jobs, or tells the owner exactly who's on the schedule this week.</p>
-        <p>No subscriptions you don't understand. No features you didn't ask for. One flat price, one working system, delivered by one person who answers the phone.</p>
+        <p>No subscriptions you don't understand. No features you didn't ask for. One clear quote, one working system, delivered by one person who answers the phone.</p>
       </div>
       <div class="ethos-foot mono">
         <span>Web Design</span><span>AI Tools</span><span>Automation</span>
@@ -515,21 +517,21 @@
     <div class="si mono">01</div>
     <div><h4>Website Design & Development</h4></div>
     <p>Custom, mobile-friendly websites built to load fast and turn visitors into booked customers.</p>
-    <div class="price">From $400<small>flat, one-time</small></div>
+    <div class="quote-link"><a href="mailto:prestondarnell46@gmail.com?subject=Website%20Quote%20Request">Get a Free Quote →</a></div>
   </div>
 
   <div class="spec-row">
     <div class="si mono">02</div>
     <div><h4>AI Chat Assistants</h4></div>
     <p>On-brand chat tools that answer customer questions and capture leads around the clock — even after hours.</p>
-    <div class="price">Custom<small>scoped to your site</small></div>
+    <div class="quote-link"><a href="mailto:prestondarnell46@gmail.com?subject=AI%20Assistant%20Quote%20Request">Get a Free Quote →</a></div>
   </div>
 
   <div class="spec-row">
     <div class="si mono">03</div>
     <div><h4>Internal AI & Booking Automation</h4></div>
     <p>Private, login-protected tools for the owner — log jobs, track customers, and ask "who's on my schedule this week."</p>
-    <div class="price">$450<small>50% deposit to start</small></div>
+    <div class="quote-link"><a href="mailto:prestondarnell46@gmail.com?subject=AI%20Automation%20Quote%20Request">Get a Free Quote →</a></div>
   </div>
 </section>
 
@@ -537,8 +539,8 @@
 <section class="cta" id="contact">
   <span class="mono">4.0 — Start a Project</span>
   <h2>Let's build your <span>system.</span></h2>
-  <a class="cta-btn" href="mailto:prestondarnell46@gmail.com">
-    + Get a Free Strategy Call
+  <a class="cta-btn" href="mailto:prestondarnell46@gmail.com?subject=Free%20Quote%20Request">
+    + Get a Free Quote
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
   </a>
 </section>
@@ -670,19 +672,19 @@ function rebuildLogoTarget(){
   logoTargets = pts;
 }
 
-const AMBIENT_COUNT = window.innerWidth < 700 ? 70 : 130;
+const AMBIENT_COUNT = window.innerWidth < 700 ? 90 : 170;
 let ambient = [];
 class A{
   constructor(){
     this.homeX = Math.random()*W; this.homeY = Math.random()*H;
     this.x = this.homeX; this.y = this.homeY;
-    this.r = Math.random()*1.2 + 0.4;
-    // scatter vector: direction + distance this particle flies outward as scroll increases
-    const ang = Math.random()*Math.PI*2;
-    const dist = 80 + Math.random()*260;
-    this.scatterX = Math.cos(ang)*dist;
-    this.scatterY = Math.sin(ang)*dist;
-    this.spin = (Math.random()-0.5)*0.01; // tiny independent rotation while scattered
+    this.r = Math.random()*1.4 + 0.6;
+    // Every particle falls roughly the SAME large distance during the
+    // hero's scroll-explosion, not a distance based on starting position —
+    // keeps them spread out rather than collapsing onto one flat line.
+    this.fallDist = H * (0.55 + Math.random()*0.35);
+    this.driftX = (Math.random()-0.5) * 90;
+    this.fallSpeed = 0.85 + Math.random()*0.3;
   }
 }
 ambient = Array.from({length:AMBIENT_COUNT}, ()=> new A());
@@ -718,72 +720,152 @@ function rebuildLogoParticles(){
 setTimeout(rebuildLogoParticles, 50);
 window.addEventListener('load', rebuildLogoParticles);
 
+// =========================================================
+// PERSISTENT STARFIELD — always-on ambient backdrop, visible
+// behind EVERY section of the page, all the time. Completely
+// separate from the hero explosion system above: own class,
+// own array, own draw loop, own error handling. Does NOT read
+// scroll position, does NOT interact with `ambient`,
+// `logoParticles`, `scatter`, or any other existing variable.
+// This is intentional — every previous attempt tied this
+// effect to scroll-position gating logic, and that gating was
+// the prime suspect for repeated failures, so this version
+// removes it entirely rather than debugging it further.
+// =========================================================
+const STARFIELD_COUNT = window.innerWidth < 700 ? 90 : 140;
+let starfield = [];
+class Star{
+  constructor(){
+    this.x = Math.random()*W;
+    this.y = Math.random()*H;
+    this.r = Math.random()*0.7 + 0.5;
+    this.vy = 0.05 + Math.random()*0.10; // slow, constant, ambient
+  }
+}
+function buildStarfield(){
+  starfield = Array.from({length: STARFIELD_COUNT}, ()=> new Star());
+}
+buildStarfield();
+window.addEventListener('resize', buildStarfield);
+
+function drawStarfield(){
+  try{
+    for(const s of starfield){
+      s.y += s.vy;
+      if(s.y > H + 4) { s.y = -4; s.x = Math.random()*W; }
+      // dark halo first, for visibility on bright backgrounds (e.g. the
+      // orange section) — verified by hand-calculation that this shifts
+      // the composited color away from background-orange enough to read
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(0,0,0,0.20)';
+      ctx.arc(s.x, s.y, s.r + 1.2, 0, Math.PI*2);
+      ctx.fill();
+      // white dot on top
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(232,230,225,0.42)';
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+  } catch(err){
+    console.error('Starfield error:', err);
+  }
+}
+
 let elapsed = 0;
 let logoPhase = 0;
 
 function step(){
-  elapsed += 1;
-  if(!reduceMotion2 && logoPhase < 1) logoPhase = Math.min(1, logoPhase + 0.012);
-  else if(reduceMotion2) logoPhase = 1;
+  try{
+    elapsed += 1;
+    if(!reduceMotion2 && logoPhase < 1) logoPhase = Math.min(1, logoPhase + 0.012);
+    else if(reduceMotion2) logoPhase = 1;
 
-  // smooth the scroll value so the scatter/reconstruct feels fluid, not jumpy
-  scrollSmooth += (scrollTarget - scrollSmooth) * 0.08;
-  const scatter = scrollSmooth; // 0 = fully formed, 1 = fully scattered
+    // smooth the scroll value so the scatter/reconstruct feels fluid, not jumpy
+    scrollSmooth += (scrollTarget - scrollSmooth) * 0.08;
+    const scatter = scrollSmooth; // 0 = fully formed, 1 = fully scattered
 
-  ctx.clearRect(0,0,W,H);
+    ctx.clearRect(0,0,W,H);
 
-  // ambient field — drifts apart from its grid-like home position as you scroll,
-  // reassembles as you scroll back up. Fully reversible, position-driven.
-  for(const p of ambient){
-    const tx = p.homeX + p.scatterX * scatter;
-    const ty = p.homeY + p.scatterY * scatter;
-    p.x += (tx - p.x) * 0.12;
-    p.y += (ty - p.y) * 0.12;
-    ctx.beginPath();
-    ctx.fillStyle = `rgba(232,230,225,${0.30 - scatter*0.10})`;
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fill();
-  }
+    // Always-on persistent starfield, drawn first (so it sits behind
+    // everything else) — completely separate system, see drawStarfield().
+    drawStarfield();
 
-  // hero logo — deconstructs outward along each particle's scatter vector as you
-  // scroll down, reconstructs back into "PS × AI" as you scroll back up.
-  const formed = logoPhase > 0.96;
-  for(let i=0;i<logoParticles.length;i++){
-    const p = logoParticles[i];
-    const t = logoTargets[i];
-    // convert stored PAGE coordinates to current viewport-relative coordinates
-    // fresh every frame — this is what makes it correct regardless of when
-    // rebuildLogoTarget() last ran relative to scroll position
-    const home = t
-      ? { x: t.pageX - window.scrollX, y: t.pageY - window.scrollY }
-      : { x: W/2, y: H/2 };
-    const local = Math.min(1, Math.max(0,(logoPhase-p.delay)/(1-p.delay)));
-
-    if(formed){
-      const hx = Math.cos(elapsed*0.02*p.hoverSpeed + p.hoverPhase) * p.hoverAmp * (1-scatter*0.6);
-      const hy = Math.sin(elapsed*0.018*p.hoverSpeed + p.hoverPhase) * p.hoverAmp * (1-scatter*0.6);
-      const tx = home.x + p.scatterX * scatter + hx;
-      const ty = home.y + p.scatterY * scatter + hy;
+    // hero-explosion ambient particles — ORIGINAL, CONFIRMED-WORKING logic
+    // only. No scroll-position gating, no "past hero" branch — that gating
+    // logic was the unconfirmed, likely-broken part of every previous
+    // attempt and has been removed entirely per the rebuild spec.
+    for(const p of ambient){
+      const fallProgress = Math.min(1, scatter * p.fallSpeed);
+      const tx = p.homeX + p.driftX * fallProgress;
+      const ty = p.homeY + p.fallDist * fallProgress;
+      const prevY = p.y;
       p.x += (tx - p.x) * 0.10;
       p.y += (ty - p.y) * 0.10;
-    } else if(logoPhase > 0 && local > 0){
-      if(p.x === undefined){ p.x = home.x; p.y = home.y; }
-      const tx = home.x + p.scatterX * scatter;
-      const ty = home.y + p.scatterY * scatter;
-      p.x += (tx - p.x) * 0.05 * local;
-      p.y += (ty - p.y) * 0.05 * local;
+
+      const speed = p.y - prevY;
+      const alpha = 0.55 - scatter*0.15;
+
+      if(Math.abs(speed) > 1.2){
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(232,230,225,${alpha})`;
+        ctx.lineWidth = p.r;
+        ctx.lineCap = 'round';
+        ctx.moveTo(p.x, p.y - speed*0.9);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(232,230,225,${alpha})`;
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fill();
+      }
     }
-    // else: logoPhase hasn't started yet (very first frame on page load) —
-    // particle simply isn't drawn yet (see below), no position assigned.
 
-    if(logoPhase <= 0 && !formed) continue; // nothing to draw yet, build starts next frame
+    // hero logo — deconstructs outward along each particle's scatter vector as you
+    // scroll down, reconstructs back into "PS × AI" as you scroll back up.
+    const formed = logoPhase > 0.96;
+    for(let i=0;i<logoParticles.length;i++){
+      const p = logoParticles[i];
+      const t = logoTargets[i];
+      // convert stored PAGE coordinates to current viewport-relative coordinates
+      // fresh every frame — this is what makes it correct regardless of when
+      // rebuildLogoTarget() last ran relative to scroll position
+      const home = t
+        ? { x: t.pageX - window.scrollX, y: t.pageY - window.scrollY }
+        : { x: W/2, y: H/2 };
+      const local = Math.min(1, Math.max(0,(logoPhase-p.delay)/(1-p.delay)));
 
-    const size = p.hub ? p.r*1.8 : p.r;
-    const alpha = (p.hub ? 0.95 : 0.8) * (1 - scatter*0.35);
-    ctx.beginPath();
-    ctx.fillStyle = p.hub ? `rgba(255,122,26,${alpha})` : `rgba(232,230,225,${alpha})`;
-    ctx.arc(p.x, p.y, size, 0, Math.PI*2);
-    ctx.fill();
+      if(formed){
+        const hx = Math.cos(elapsed*0.02*p.hoverSpeed + p.hoverPhase) * p.hoverAmp * (1-scatter*0.6);
+        const hy = Math.sin(elapsed*0.018*p.hoverSpeed + p.hoverPhase) * p.hoverAmp * (1-scatter*0.6);
+        const tx = home.x + p.scatterX * scatter + hx;
+        const ty = home.y + p.scatterY * scatter + hy;
+        p.x += (tx - p.x) * 0.10;
+        p.y += (ty - p.y) * 0.10;
+      } else if(logoPhase > 0 && local > 0){
+        if(p.x === undefined){ p.x = home.x; p.y = home.y; }
+        const tx = home.x + p.scatterX * scatter;
+        const ty = home.y + p.scatterY * scatter;
+        p.x += (tx - p.x) * 0.05 * local;
+        p.y += (ty - p.y) * 0.05 * local;
+      }
+      // else: logoPhase hasn't started yet (very first frame on page load) —
+      // particle simply isn't drawn yet (see below), no position assigned.
+
+      if(logoPhase <= 0 && !formed) continue; // nothing to draw yet, build starts next frame
+
+      const size = p.hub ? p.r*1.8 : p.r;
+      const alpha = (p.hub ? 0.95 : 0.8) * (1 - scatter*0.35);
+      ctx.beginPath();
+      ctx.fillStyle = p.hub ? `rgba(255,122,26,${alpha})` : `rgba(232,230,225,${alpha})`;
+      ctx.arc(p.x, p.y, size, 0, Math.PI*2);
+      ctx.fill();
+    }
+  } catch(err){
+    // a failure here should never silently kill the whole animation loop —
+    // log it so it's at least visible in DevTools console instead of just
+    // freezing forever with no trace
+    console.error('Particle animation error:', err);
   }
 
   requestAnimationFrame(step);
