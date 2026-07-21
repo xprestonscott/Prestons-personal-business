@@ -230,13 +230,15 @@
     h2{font-size:clamp(24px,7.8vw,38px);}
     .sub{font-size:12px; max-width:88vw; margin-top:8px;}
     .idx{margin-bottom:8px;}
-    .stage3d{margin-top:12px; transform:scale(0.82); transform-origin:top center;}
+    #logoZone{height:30vh !important;}
+    .heroSec p{margin-top:12px;}
+    .stage3d{margin-top:12px; transform:scale(0.95); transform-origin:top center;}
     .tilt{flex-direction:column; align-items:center; gap:12px;}
-    .gcard{width:86vw; max-width:340px; padding:15px 17px;}
-    .gcard h4{font-size:12.5px; margin-bottom:8px;}
-    .gcard .quote{margin-top:10px; font-size:10px;}
-    .msg{font-size:10px; padding:6px 9px;}
-    .big{font-size:26px;}
+    .gcard{width:90vw; max-width:380px; padding:18px 20px;}
+    .gcard h4{font-size:13.5px; margin-bottom:9px;}
+    .gcard .quote{margin-top:12px; font-size:10.5px;}
+    .msg{font-size:11px; padding:8px 11px;}
+    .big{font-size:32px;}
     .miniweb .page{padding:10px 10px 12px;}
     .pipe{gap:6px;}
     .step{font-size:10px;}
@@ -269,7 +271,7 @@
   <section class="sec">
     <div class="eyebrow mono fx">Websites &amp; AI Systems</div>
     <!-- the 3D silver logo is rendered by the particles on the canvas -->
-    <div style="height:clamp(150px,20vw,250px);"></div>
+    <div id="logoZone" style="height:clamp(150px,20vw,250px);"></div>
     <h1 class="fx" style="font-size:clamp(22px,3vw,34px); letter-spacing:0.34em; margin-top:2px;">BUILT&nbsp;TO&nbsp;<em style="font-style:normal;color:var(--orange)">RUN</em></h1>
     <p class="sub fx">Custom websites and practical AI tools for Oklahoma small businesses. Scroll — the system assembles itself.</p>
   </section>
@@ -401,9 +403,9 @@ function resize(force){
   W=innerWidth; H=VH;
   cv.width=W*DPR; cv.height=H*DPR;
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  buildLogoTargets();
   document.querySelectorAll('.sec').forEach(s=>s.style.height=VH+'px');
   document.getElementById('spacer').style.height = (SECTIONS*VH)+'px';
+  buildLogoTargets();
 }
 window.addEventListener('resize',()=>resize(false));
 
@@ -434,21 +436,30 @@ function initField(){
 }
 
 /* ---------- logo particles ---------- */
-const NL=IS_MOBILE?2200:6500;
+const NL=IS_MOBILE?3400:6500;
 let logoPts=[];
 const logoParts=[];
+let logoCY=0;
 function buildLogoTargets(){
   const off=document.createElement('canvas');
   off.width=W; off.height=H;
   const o=off.getContext('2d');
-  const fs=IS_MOBILE? W*0.26 : Math.min(W*0.14,190);   // logo reads big on phones
+  let fs=IS_MOBILE? W*0.30 : Math.min(W*0.14,190);     // logo reads big on phones
+  logoCY=H*0.40;
+  /* on phones, anchor the logo to the layout's reserved zone so it can't
+     drift into the copy on any screen size */
+  const zone=document.getElementById('logoZone');
+  if(IS_MOBILE && zone){
+    const r=zone.getBoundingClientRect();
+    if(r.height>0){ logoCY=r.top+r.height/2; fs=Math.min(W*0.30, r.height*1.15); }
+  }
   o.font=`800 ${fs}px Inter, sans-serif`;
   o.textAlign='center'; o.textBaseline='middle';
   o.fillStyle='#fff';
-  o.fillText('PS×AI', W/2, H*0.40);
+  o.fillText('PS×AI', W/2, logoCY);
   const d=o.getImageData(0,0,W,H).data;
   logoPts=[];
-  const st=2;                                      // fine dust sampling
+  const st=IS_MOBILE?3:2;   // coarser sampling on phones = every point gets grains = solid letters
   for(let y=0;y<H;y+=st) for(let x=0;x<W;x+=st){
     if(d[(y*W+x)*4+3]>90){
       /* extrude: every glyph pixel gets a depth so the logo is a 3D slab */
@@ -552,7 +563,7 @@ function frame(nowMs){
     const rot=Math.sin(t*0.30)*0.5+(mouse.x-0.5)*1.1;
     const cR=Math.cos(rot), sR=Math.sin(rot);
     const tilt=(mouse.y-0.5)*0.25;
-    const cx2=W/2, cy2=H*0.40, LF=850;
+    const cx2=W/2, cy2=logoCY||H*0.40, LF=850;
 
     for(let i=0;i<NL;i++){
       const p=logoParts[i];
