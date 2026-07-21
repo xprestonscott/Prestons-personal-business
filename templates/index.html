@@ -217,7 +217,9 @@
     animation:bob 2s ease-in-out infinite;
   }
   @keyframes bob{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,6px);}}
-  /* ===== mobile (must stay LAST so it overrides the base rules) ===== */
+  /* ===== mobile (must stay LAST so it overrides the base rules) =====
+     Same experience as desktop — cards still fly in from depth —
+     just stacked, compacted and scaled so a phone viewport fits it. */
   @media (max-width:760px){
     #rail{display:none;}
     nav{padding:12px 14px;}
@@ -225,21 +227,19 @@
     .nav-cta{font-size:9px; padding:8px 12px;}
     .heroSec h1, .sec h1{letter-spacing:0.16em !important; font-size:clamp(15px,4.4vw,20px) !important;}
     .sec{padding:0 5vw;}
-    h2{font-size:clamp(26px,8.5vw,40px);}
-    .sub{font-size:12.5px; max-width:88vw; margin-top:10px;}
+    h2{font-size:clamp(24px,7.8vw,38px);}
+    .sub{font-size:12px; max-width:88vw; margin-top:8px;}
     .idx{margin-bottom:8px;}
-    .stage3d{margin-top:18px; perspective:none;}
-    .tilt{transform:none !important; gap:14px;}
-    /* one card per section on phones — two can't fit a viewport */
-    .gcard:nth-child(2){display:none;}
-    .gcard{
-      width:88vw; padding:16px 18px;
-      transform:none; opacity:1; filter:none;
-      transition:opacity .8s ease;
-    }
-    .sec .gcard{transform:none !important;}
-    .msg{font-size:10.5px; padding:7px 10px;}
-    .big{font-size:32px;}
+    .stage3d{margin-top:12px; transform:scale(0.82); transform-origin:top center;}
+    .tilt{flex-direction:column; align-items:center; gap:12px;}
+    .gcard{width:86vw; max-width:340px; padding:15px 17px;}
+    .gcard h4{font-size:12.5px; margin-bottom:8px;}
+    .gcard .quote{margin-top:10px; font-size:10px;}
+    .msg{font-size:10px; padding:6px 9px;}
+    .big{font-size:26px;}
+    .miniweb .page{padding:10px 10px 12px;}
+    .pipe{gap:6px;}
+    .step{font-size:10px;}
     .cta{padding:12px 22px; font-size:12px;}
     #scrollHint{bottom:12px;}
   }
@@ -388,17 +388,24 @@ let W,H,DPR;
 /* lock viewport height so the mobile URL-bar collapse can't cause
    scroll jumps; refresh only on real width/orientation changes */
 let VH=innerHeight, lastW=innerWidth;
-function resize(){
-  if(Math.abs(innerWidth-lastW)>60 || !VH){ VH=innerHeight; lastW=innerWidth; }
+function resize(force){
+  /* URL-bar show/hide fires resize on every scroll direction change on
+     phones — rebuilding particles then causes visible glitches. Only do
+     real work when the width (orientation) actually changes. */
+  const wChanged=Math.abs(innerWidth-lastW)>60;
+  if(!force && !wChanged) return;
+  VH=innerHeight; lastW=innerWidth;
   DPR=Math.min(window.devicePixelRatio||1, IS_MOBILE?1.5:2);
-  W=cv.offsetWidth; H=cv.offsetHeight;
+  cv.style.width='100vw';
+  cv.style.height=VH+'px';                 // locked px height: immune to URL bar
+  W=innerWidth; H=VH;
   cv.width=W*DPR; cv.height=H*DPR;
   ctx.setTransform(DPR,0,0,DPR,0,0);
   buildLogoTargets();
   document.querySelectorAll('.sec').forEach(s=>s.style.height=VH+'px');
   document.getElementById('spacer').style.height = (SECTIONS*VH)+'px';
 }
-window.addEventListener('resize',resize);
+window.addEventListener('resize',()=>resize(false));
 
 const SECTIONS=5;
 const world=document.getElementById('world');
@@ -465,17 +472,20 @@ function initLogoParts(){
 
 /* ---------- buttery scroll + snap ---------- */
 let smoothY=0, snapT=null, lastScroll=0;
-window.addEventListener('scroll',()=>{
-  lastScroll=performance.now();
-  if(snapT){clearTimeout(snapT);}
-  snapT=setTimeout(()=>{
-    const sh=VH;
-    const near=Math.round(window.scrollY/sh)*sh;
-    if(Math.abs(window.scrollY-near)>4){
-      window.scrollTo({top:near, behavior:'smooth'});
-    }
-  },170);
-},{passive:true});
+/* idle snap fights momentum scrolling on touch devices — desktop only */
+if(!IS_MOBILE){
+  window.addEventListener('scroll',()=>{
+    lastScroll=performance.now();
+    if(snapT){clearTimeout(snapT);}
+    snapT=setTimeout(()=>{
+      const sh=VH;
+      const near=Math.round(window.scrollY/sh)*sh;
+      if(Math.abs(window.scrollY-near)>4){
+        window.scrollTo({top:near, behavior:'smooth'});
+      }
+    },170);
+  },{passive:true});
+}
 
 railDots.forEach((d,i)=>d.addEventListener('click',()=>{
   window.scrollTo({top:i*VH, behavior:'smooth'});
@@ -590,7 +600,7 @@ function frame(nowMs){
   requestAnimationFrame(frame);
 }
 
-resize();
+resize(true);
 initField();
 initLogoParts();
 document.fonts.ready.then(buildLogoTargets);
