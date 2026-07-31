@@ -6,7 +6,7 @@
 <title>Preston Scott — Websites &amp; AI Integration</title>
 <meta name="description" content="Custom websites and practical AI tools for small businesses across Oklahoma. Less manual follow-up. More booked jobs. Built to run." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0a0a0c;
@@ -245,6 +245,189 @@
     .cta{padding:12px 22px; font-size:12px;}
     #scrollHint{bottom:12px;}
   }
+  /* ===================================================================
+     NEVER MISS A JOB — product content below the hero.
+     Everything is scoped under #product so it cannot touch the hero
+     cinematic. Reuses the site's own .chrome / .idx / .sub / .mono.
+     =================================================================== */
+  #product{
+    position:relative; z-index:6; background:var(--bg);
+    --card:#0d0d10; --good:#5ad19a;
+  }
+  #product .psec{padding:112px 5vw; position:relative;}
+  #product .inner{max-width:1080px; margin:0 auto;}
+  #product .idx{text-align:center; margin-bottom:24px; font-size:11px;}
+  #product h2{text-align:center; text-transform:uppercase; line-height:0.94;}
+  #product .dek{
+    text-align:center; color:var(--ink-dim); font-size:clamp(14px,1.6vw,16px);
+    line-height:1.68; max-width:60ch; margin:24px auto 0; font-weight:600;
+  }
+  #product .dek b{color:var(--ink);}
+
+  /* reveal (the hero engine's .sec.live trigger doesn't reach down here) */
+  #product .fx{opacity:0; transform:translateY(26px); filter:blur(5px);
+    transition:opacity .8s ease, transform .8s ease, filter .8s ease;}
+  #product .fx.in{opacity:1; transform:none; filter:none;}
+
+  /* ---- cards ---- */
+  #product .grid{display:grid; gap:18px; margin-top:48px;}
+  #product .g2{grid-template-columns:1fr 1fr;}
+  #product .g3{grid-template-columns:repeat(3,1fr);}
+  #product .card{
+    background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:26px; position:relative; box-shadow:0 24px 60px rgba(0,0,0,.45);
+  }
+  #product .card h3{font-size:16px; font-weight:700; letter-spacing:-.01em; margin-bottom:12px;}
+  #product .card p{color:var(--ink-dim); font-size:14px; line-height:1.62; font-weight:600;}
+  #product .cnum{position:absolute; top:20px; right:22px; font-size:10px; color:#3a3a3e;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em;}
+  #product .bignum{font-size:clamp(34px,4.6vw,48px); font-weight:800; letter-spacing:-.04em;
+    line-height:1; margin:4px 0 12px;}
+  #product .bignum em{font-style:normal; color:var(--orange);}
+  #product .tags{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;}
+  #product .tag{background:rgba(255,122,26,.13); border:1px solid rgba(255,122,26,.3);
+    color:var(--orange); border-radius:20px; padding:5px 11px; font-size:10px; font-weight:700;}
+
+  /* ---- phone sim ---- */
+  #product .simwrap{display:flex; flex-direction:column; align-items:center;}
+  #product .phone{width:254px; background:#050506; border:8px solid #1a1a1e;
+    border-radius:32px; box-shadow:0 30px 70px rgba(0,0,0,.6);}
+  #product .notch{height:20px; display:flex; align-items:center; justify-content:center;}
+  #product .notch::after{content:""; width:82px; height:15px; background:#1a1a1e;
+    border-radius:0 0 12px 12px;}
+  #product .pscreen{padding:6px 10px 16px; min-height:360px; display:flex; flex-direction:column;}
+  #product .callcard{background:#131317; border:1px solid var(--line); border-radius:13px;
+    padding:16px 12px; text-align:center; margin-bottom:10px;}
+  #product .callcard .who{font-weight:700; font-size:15px;}
+  #product .callcard .num{color:#5f5f5c; font-size:11px; margin-top:3px;
+    font-family:'JetBrains Mono',monospace;}
+  #product .st{font-size:10px; font-weight:700; margin-top:8px;}
+  #product .st.miss{color:#ff5b4d;} #product .st.ring{color:var(--orange);}
+  #product .thread{display:flex; flex-direction:column; gap:7px;}
+  #product .bub{max-width:84%; padding:9px 12px; border-radius:15px; font-size:13px;
+    line-height:1.45; font-weight:600; text-align:left;
+    opacity:0; transform:translateY(8px); animation:pbub .34s ease forwards;}
+  @keyframes pbub{to{opacity:1; transform:none;}}
+  #product .bub.out{align-self:flex-end; background:var(--orange); color:#170800;
+    border-bottom-right-radius:4px;}
+  #product .bub.in2{align-self:flex-start; background:#1b1b20; color:var(--ink);
+    border-bottom-left-radius:4px;}
+  #product .stamp{font-size:9px; color:#4e4e52; text-align:center; padding:5px 0 1px;}
+  #product .simbtn{margin-top:16px; background:transparent; border:1px solid var(--line);
+    color:var(--ink-dim); border-radius:4px; padding:10px 16px; font-size:10px; cursor:pointer;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;
+    font-weight:500; transition:all .3s;}
+  #product .simbtn:hover{border-color:var(--orange); color:var(--orange);}
+
+  /* ---- checklist ---- */
+  #product .chk{list-style:none; margin-top:2px;}
+  #product .chk li{display:flex; align-items:center; gap:11px; padding:8px 0;
+    font-size:13.5px; font-weight:700;}
+  #product .chk .dot{width:19px; height:19px; border-radius:50%; background:var(--orange);
+    color:#0a0a0c; display:grid; place-items:center; font-size:11px; flex-shrink:0; font-weight:800;}
+  #product .chk .meta{margin-left:auto; font-size:10px; color:#5f5f5c;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em;}
+
+  /* ---- calculator ---- */
+  #product .calc{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:48px;}
+  #product .field{margin-bottom:24px;}
+  #product .field:last-child{margin-bottom:0;}
+  #product .field label{display:block; font-size:13px; font-weight:700; margin-bottom:8px;}
+  #product .field .v{font-size:28px; font-weight:800; color:var(--orange);
+    letter-spacing:-.03em; line-height:1;}
+  #product .field input[type=range]{width:100%; accent-color:var(--orange); height:4px; margin-top:12px;}
+  #product .field .hint{font-size:11.5px; color:#5f5f5c; font-weight:600; margin-top:8px; line-height:1.55;}
+  #product .out{display:flex; flex-direction:column; justify-content:center;}
+  #product .out .lab{font-size:10px; color:var(--ink-dim); margin-bottom:10px;}
+  #product .out .money{font-size:clamp(38px,5.6vw,58px); font-weight:800;
+    letter-spacing:-.045em; line-height:1; color:#ff5b4d;}
+  #product .out .exp{color:var(--ink-dim); font-size:13px; line-height:1.62;
+    margin-top:14px; font-weight:600;}
+  #product .payoff{border:1px solid rgba(90,209,154,.28); background:rgba(90,209,154,.07);
+    border-radius:12px; padding:15px; margin-top:20px; font-size:13px; line-height:1.6;
+    color:#a9dfc6; font-weight:600;}
+  #product .payoff b{color:var(--good); font-weight:800;}
+  #product .assume{font-size:11px; color:#4e4e52; margin-top:14px; line-height:1.6; font-weight:600;}
+
+  /* ---- dashboard ---- */
+  #product .dash{border:1px solid var(--line); border-radius:18px; overflow:hidden;
+    margin-top:48px; background:var(--card); box-shadow:0 24px 60px rgba(0,0,0,.45);}
+  #product .dbar{background:#111114; padding:12px 20px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:8px;}
+  #product .dbar i{width:9px; height:9px; border-radius:50%; background:#2e2e33; display:block;}
+  #product .dbar span{margin-left:12px; font-size:10px; color:var(--ink-dim);}
+  #product .dbody{padding:26px;}
+  #product .tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:13px;}
+  #product .tile{background:#0a0a0c; border:1px solid var(--line); border-radius:12px; padding:17px;}
+  #product .tile .k{font-size:9px; color:#5f5f5c;}
+  #product .tile .n{font-size:30px; font-weight:800; letter-spacing:-.04em; margin-top:7px; line-height:1;}
+  #product .tile .s{font-size:10px; margin-top:6px; color:var(--good); font-weight:700;}
+  #product .tile.on .n{color:var(--good);}
+  #product .tile.off .s{color:#5f5f5c;}
+  #product .feed{margin-top:22px; border-top:1px solid var(--line); padding-top:20px;}
+  #product .feed .h{font-size:9px; color:#5f5f5c; margin-bottom:13px;}
+  #product .frow{display:flex; align-items:center; gap:13px; padding:10px 0; font-size:13px;
+    font-weight:600; border-bottom:1px solid rgba(232,230,225,.06); flex-wrap:wrap;}
+  #product .frow:last-child{border-bottom:0;}
+  #product .pill{font-size:9px; font-weight:700; padding:4px 9px; border-radius:20px; white-space:nowrap;}
+  #product .p-c{background:rgba(90,209,154,.14); color:var(--good);}
+  #product .p-b{background:rgba(255,122,26,.14); color:var(--orange);}
+  #product .p-r{background:rgba(150,170,255,.14); color:#9aaaff;}
+  #product .frow .who{font-weight:700; min-width:100px;}
+  #product .frow .d{color:var(--ink-dim);}
+  #product .frow .t{margin-left:auto; font-size:10px; color:#4e4e52;}
+  #product .note{border-left:2px solid var(--orange); padding:12px 16px; margin-top:22px;
+    font-size:12.5px; color:var(--ink-dim); line-height:1.6; font-weight:600;}
+  #product .note b{color:var(--ink);}
+
+  /* ---- pricing ---- */
+  #product .tier{background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:26px; position:relative;}
+  #product .tier.feat{border-color:rgba(255,122,26,.42); box-shadow:0 0 44px rgba(255,122,26,.11);}
+  #product .tier .nm{font-size:11px; color:var(--ink-dim);}
+  #product .tier .setup{font-size:38px; font-weight:800; letter-spacing:-.045em;
+    margin-top:12px; line-height:1;}
+  #product .tier .mo{color:var(--orange); font-weight:800; font-size:15px; margin-top:8px;}
+  #product .tier .sub2{font-size:10px; color:#4e4e52; margin-top:6px;}
+  #product .tier ul{list-style:none; margin-top:20px; border-top:1px solid var(--line); padding-top:18px;}
+  #product .tier li{font-size:13px; color:var(--ink-dim); padding:7px 0 7px 23px;
+    position:relative; line-height:1.5; font-weight:600;}
+  #product .tier li::before{content:""; position:absolute; left:0; top:12px; width:10px; height:5px;
+    border-left:2px solid var(--orange); border-bottom:2px solid var(--orange); transform:rotate(-45deg);}
+  #product .flag{position:absolute; top:-9px; left:26px; background:var(--orange); color:#0a0a0c;
+    font-size:9px; font-weight:700; padding:4px 10px; border-radius:3px;}
+
+  /* ---- faq ---- */
+  #product .faq{max-width:800px; margin:48px auto 0;}
+  #product details{border-bottom:1px solid var(--line); padding:19px 0;}
+  #product summary{cursor:pointer; font-weight:700; font-size:15px; list-style:none;
+    display:flex; justify-content:space-between; gap:20px; align-items:flex-start;}
+  #product summary::-webkit-details-marker{display:none;}
+  #product summary::after{content:"+"; color:var(--orange); font-size:20px; line-height:1;
+    flex-shrink:0; font-weight:700;}
+  #product details[open] summary::after{content:"–";}
+  #product details p{color:var(--ink-dim); font-size:14px; line-height:1.68;
+    margin-top:12px; font-weight:600;}
+  #product details em{color:var(--ink); font-style:normal;}
+
+  /* ---- close ---- */
+  #product .close{text-align:center; padding:130px 5vw 120px;}
+  #product .close h2{color:var(--ink); -webkit-text-fill-color:currentColor;
+    font-size:clamp(44px,7.4vw,104px);}
+  #product .close em{font-style:normal; color:var(--orange);}
+  #product .bigcta{display:inline-block; margin-top:34px; background:var(--orange); color:#0a0a0c;
+    text-decoration:none; border-radius:6px; padding:15px 26px; font-size:12px; font-weight:700;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;}
+  #product footer{border-top:1px solid var(--line); padding:32px 5vw; text-align:center;}
+  #product footer div{font-size:10px; color:#4e4e52; line-height:2;}
+
+  @media(max-width:900px){
+    #product .psec{padding:74px 6vw;}
+    #product .g2, #product .g3, #product .calc{grid-template-columns:1fr;}
+    #product .tiles{grid-template-columns:1fr 1fr;}
+    #product .close{padding:90px 6vw 80px;}
+  }
+
 </style>
 </head>
 <body>
@@ -276,98 +459,271 @@
     <p class="sub fx">Custom websites and practical AI tools for Oklahoma small businesses. Scroll — the system assembles itself.</p>
   </section>
 
-  <!-- 02 · WEB DESIGN -->
-  <section class="sec">
-    <div class="idx mono fx"><b>01</b> / Web Design</div>
-    <h2 class="chrome fx">SITES THAT SELL<br>WHILE YOU WORK.</h2>
-    <div class="stage3d">
-      <div class="tilt">
-        <div class="gcard" style="--z:40px;">
-          <h4>Your site, rebuilt to convert</h4>
-          <div class="miniweb">
-            <div class="bar"><i></i><i></i><i></i></div>
-            <div class="page">
-              <div class="mh">BUILT<br>TO <em>RUN</em></div>
-              <div class="ms">Custom websites &amp; practical AI tools<br>for Oklahoma small businesses.</div>
-              <div class="mb">+ GET A FREE QUOTE</div>
-            </div>
-          </div>
-          <a class="quote" href="mailto:prestondarnell46@gmail.com?subject=Website%20Quote%20Request">Get a Free Quote →</a>
-        </div>
-        <div class="gcard" style="--z:90px;">
-          <h4>Built for the job site</h4>
-          <div class="big">&lt;1s <em>load</em></div>
-          <p class="sub" style="margin-top:10px; font-size:12px;">Mobile-first and fast on rural cell service — because your customers aren't browsing on fiber.</p>
-          <div style="margin-top:14px;"><span class="chip">MOBILE-FIRST</span>&nbsp;<span class="chip">SEO READY</span></div>
-          <a class="quote" href="mailto:prestondarnell46@gmail.com?subject=Website%20Quote%20Request">Get a Free Quote →</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 03 · AI ASSISTANTS -->
-  <section class="sec">
-    <div class="idx mono fx"><b>02</b> / AI Assistants</div>
-    <h2 class="chrome fx">AN EMPLOYEE THAT<br>NEVER SLEEPS.</h2>
-    <div class="stage3d">
-      <div class="tilt">
-        <div class="gcard" style="--z:80px;">
-          <h4>Live on your site, 24/7</h4>
-          <div class="chat">
-            <div class="msg them"><span class="who">Customer · 11:42 PM</span>Do y'all have any openings this week?</div>
-            <div class="msg ai"><span class="who">PS×AI Assistant</span>Yes — Thursday at 2 PM just opened up. Want me to book it for you?</div>
-            <div class="msg them"><span class="who">Customer</span>Book it 👍</div>
-            <div class="msg ai"><span class="who">PS×AI Assistant</span>Done. You'll get a text confirmation in a minute. ✓</div>
-          </div>
-          <a class="quote" href="mailto:prestondarnell46@gmail.com?subject=AI%20Assistant%20Quote%20Request">Get a Free Quote →</a>
-        </div>
-        <div class="gcard" style="--z:30px;">
-          <h4>While you were working</h4>
-          <div class="big">3 <em>jobs</em></div>
-          <p class="sub" style="margin-top:10px; font-size:12px;">booked overnight without a single phone call. The assistant answers, quotes, and schedules.</p>
-          <div style="margin-top:14px;"><span class="chip">ANSWERS AT 2 AM</span></div>
-          <a class="quote" href="mailto:prestondarnell46@gmail.com?subject=AI%20Assistant%20Quote%20Request">Get a Free Quote →</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 04 · AUTOMATION -->
-  <section class="sec">
-    <div class="idx mono fx"><b>03</b> / Automation</div>
-    <h2 class="chrome fx">SLOW FOLLOW-UP<br>ENDS HERE.</h2>
-    <div class="stage3d">
-      <div class="tilt">
-        <div class="gcard" style="--z:70px;">
-          <h4>Every lead, handled</h4>
-          <div class="pipe">
-            <div class="step done"><span class="dot">✓</span> New lead captured <span class="ln mono">0 MIN</span></div>
-            <div class="step done"><span class="dot">✓</span> Follow-up text sent <span class="ln mono">2 MIN</span></div>
-            <div class="step done"><span class="dot">✓</span> Quote delivered <span class="ln mono">9 MIN</span></div>
-            <div class="step done"><span class="dot">✓</span> Job booked <span class="ln mono">14 MIN</span></div>
-          </div>
-          <a class="quote" href="mailto:prestondarnell46@gmail.com?subject=AI%20Automation%20Quote%20Request">Get a Free Quote →</a>
-        </div>
-        <div class="gcard" style="--z:30px;">
-          <h4>The number that matters</h4>
-          <div class="big">0 <em>missed</em></div>
-          <p class="sub" style="margin-top:10px; font-size:12px;">follow-ups since launch. The system chases every lead so you don't have to remember to.</p>
-          <div style="margin-top:14px;"><span class="chip">RUNS QUIETLY</span>&nbsp;<span class="chip">24/7</span></div>
-          <a class="quote" href="mailto:prestondarnell46@gmail.com?subject=AI%20Automation%20Quote%20Request">Get a Free Quote →</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 05 · FINALE -->
-  <section class="sec">
-    <div class="eyebrow mono fx">One person. One system.</div>
-    <h2 class="fx" style="font-size:clamp(44px,7.4vw,104px);">LET'S BUILD<br>YOUR <em style="font-style:normal;color:var(--orange)">SYSTEM.</em></h2>
-    <a class="cta fx mono" href="mailto:prestondarnell46@gmail.com?subject=Free%20Quote%20Request">+ Get a Free Quote</a>
-    <div class="mono fx" style="margin-top:22px; font-size:10px; color:var(--ink-dim);">prestonscottsystems.com</div>
-  </section>
-
 </div>
+
+<main id="product">
+
+  <!-- 01 · THE PROBLEM -->
+  <section class="psec" id="p1">
+   <div class="inner">
+    <div class="idx mono fx"><b>01</b> / The Problem</div>
+    <h2 class="chrome fx">EVERY MISSED CALL<br>IS A JOB YOU LOST.</h2>
+    <p class="dek fx">You're on a roof. Under a truck. In a crawlspace. The phone rings and you
+      can't get it — so they call the next guy and he books the job.
+      <b>This is the part that fixes that.</b></p>
+
+    <div class="grid g2">
+      <div class="card simwrap fx">
+        <div class="cnum mono">LIVE</div>
+        <div class="phone"><div class="notch"></div><div class="pscreen" id="screen"></div></div>
+        <button class="simbtn" id="sim">▶ Watch a call get saved</button>
+      </div>
+      <div class="card fx">
+        <div class="cnum mono">02</div>
+        <h3>What it does when you can't answer</h3>
+        <div class="bignum">10 sec <em>flat</em></div>
+        <p>They get a text from your number asking what they need. People answer texts. Almost
+          nobody leaves a voicemail anymore — they just call the next guy on the list.</p>
+        <ul class="chk">
+          <li><span class="dot">✓</span> Call comes in, goes unanswered <span class="meta">0 sec</span></li>
+          <li><span class="dot">✓</span> Text goes out automatically <span class="meta">10 sec</span></li>
+          <li><span class="dot">✓</span> They write back <span class="meta">2 min</span></li>
+          <li><span class="dot">✓</span> You pick it up when you're down <span class="meta">later</span></li>
+        </ul>
+        <div class="tags"><span class="tag mono">Nights</span><span class="tag mono">Weekends</span>
+          <span class="tag mono">24/7</span></div>
+      </div>
+    </div>
+   </div>
+  </section>
+
+  <!-- 02 · THE MATH -->
+  <section class="psec" id="p2">
+   <div class="inner">
+    <div class="idx mono fx"><b>02</b> / The Math</div>
+    <h2 class="chrome fx">RUN YOUR OWN<br>NUMBERS.</h2>
+    <p class="dek fx">Move the sliders to what's actually true for you. This isn't a sales figure —
+      it's your arithmetic, and if it doesn't add up it'll tell you so.</p>
+
+    <div class="calc">
+      <div class="card fx">
+        <div class="cnum mono">INPUT</div>
+        <div class="field">
+          <label for="job">What's an average job worth to you?</label>
+          <div class="v" id="jobv">$4,500</div>
+          <input type="range" id="job" min="500" max="25000" step="250" value="4500">
+          <div class="hint">Your typical ticket — not your biggest, not your smallest.</div>
+        </div>
+        <div class="field">
+          <label for="miss">Calls you miss in a normal week</label>
+          <div class="v" id="missv">5</div>
+          <input type="range" id="miss" min="1" max="40" step="1" value="5">
+          <div class="hint">Voicemails, hang-ups, and after-hours rings.</div>
+        </div>
+        <div class="field">
+          <label for="newpct">How many of those are new customers wanting work?</label>
+          <div class="v" id="newpctv">35%</div>
+          <input type="range" id="newpct" min="10" max="80" step="5" value="35">
+          <div class="hint">The rest are suppliers, existing customers, spam and wrong numbers.
+            Those don't count, so we leave them out.</div>
+        </div>
+        <div class="field">
+          <label for="closer">Of the new ones you reach, how many book?</label>
+          <div class="v" id="closev">25%</div>
+          <input type="range" id="closer" min="5" max="70" step="5" value="25">
+        </div>
+      </div>
+
+      <div class="card out fx">
+        <div class="cnum mono">RESULT</div>
+        <div class="lab mono">Walking out the door each year</div>
+        <div class="money" id="lost">$0</div>
+        <div class="exp" id="detail"></div>
+        <div class="payoff" id="payoff"></div>
+        <div class="assume">The one number you didn't set: we assume 40% of people who get an
+          instant text write back. The rest were never going to answer anyway. Defaults here are
+          deliberately conservative — most owners miss more calls than they think. This is a model
+          built from your numbers, not a promise of results.</div>
+      </div>
+    </div>
+   </div>
+  </section>
+
+  <!-- 03 · THE SYSTEM -->
+  <section class="psec" id="p3">
+   <div class="inner">
+    <div class="idx mono fx"><b>03</b> / The System</div>
+    <h2 class="chrome fx">IT'S NOT A WEBSITE.<br>IT'S WHAT CATCHES THE WORK.</h2>
+    <p class="dek fx">A website sits there and waits. This does something. You get the site
+      too — the site is just the smallest part of it.</p>
+
+    <div class="grid g3">
+      <div class="card fx"><div class="cnum mono">01</div><h3>Missed-call text-back</h3>
+        <p>Somebody calls, you can't pick up. Ten seconds later they get a text from your number:
+          "Sorry we missed you — what do you need done?"</p></div>
+      <div class="card fx"><div class="cnum mono">02</div><h3>Instant lead alerts</h3>
+        <p>Anyone who texts in or fills out your form hits your phone immediately. No inbox to
+          check at 9pm. No lead sitting for two days going cold.</p></div>
+      <div class="card fx"><div class="cnum mono">03</div><h3>A site built to get called</h3>
+        <p>Fast on rural cell service, tap-to-call at the top, your real photos and real reviews.
+          Built for somebody standing in their driveway looking at a problem.</p></div>
+      <div class="card fx"><div class="cnum mono">04</div><h3>Review engine</h3>
+        <p>After a finished job the customer gets a friendly text asking for a Google review.
+          Reviews are why the next person picks you. Most shops just never ask.</p></div>
+      <div class="card fx"><div class="cnum mono">05</div><h3>Your dashboard</h3>
+        <p>One link. Calls caught, leads in, reviews gained, jobs booked. You can check whether
+          it's working without taking my word for anything.</p></div>
+      <div class="card fx"><div class="cnum mono">06</div><h3>I keep it running</h3>
+        <p>Hosting, backups, security, and any change you want — new photos, new prices, a service
+          you added. You text me, it gets done. That's the monthly.</p></div>
+    </div>
+   </div>
+  </section>
+
+  <!-- 04 · THE PROOF -->
+  <section class="psec" id="p4">
+   <div class="inner">
+    <div class="idx mono fx"><b>04</b> / The Proof</div>
+    <h2 class="chrome fx">YOU CAN SEE<br>IT WORKING.</h2>
+    <p class="dek fx">Most marketing spends your money and hands you a shrug. You get a page that
+      shows exactly what got caught, who it was, and what happened next.</p>
+
+    <div class="dash fx">
+      <div class="dbar"><i></i><i></i><i></i><span class="mono">Ridgeline Roofing — this month</span></div>
+      <div class="dbody">
+        <div class="tiles">
+          <div class="tile off"><div class="k mono">Calls missed</div><div class="n">23</div>
+            <div class="s">would've been gone</div></div>
+          <div class="tile on"><div class="k mono">Texted back</div><div class="n">23</div>
+            <div class="s">100% — automatic</div></div>
+          <div class="tile on"><div class="k mono">Wrote back</div><div class="n">9</div>
+            <div class="s">real conversations</div></div>
+          <div class="tile on"><div class="k mono">Booked</div><div class="n">3</div>
+            <div class="s">jobs you'd have lost</div></div>
+        </div>
+        <div class="feed">
+          <div class="h mono">Recent activity</div>
+          <div class="frow"><span class="pill p-c mono">Caught</span><span class="who">(918) 555-0164</span>
+            <span class="d">Texted back in 8 seconds</span><span class="t mono">4:12p</span></div>
+          <div class="frow"><span class="pill p-b mono">Booked</span><span class="who">Dana W.</span>
+            <span class="d">Hail damage inspection — Thursday</span><span class="t mono">11:40a</span></div>
+          <div class="frow"><span class="pill p-r mono">Review</span><span class="who">Marcus T.</span>
+            <span class="d">Left 5 stars on Google</span><span class="t mono">Yest</span></div>
+          <div class="frow"><span class="pill p-c mono">Caught</span><span class="who">(539) 555-0102</span>
+            <span class="d">After hours — 9:47pm Saturday</span><span class="t mono">Sat</span></div>
+          <div class="frow"><span class="pill p-b mono">Booked</span><span class="who">Ellis Property</span>
+            <span class="d">Gutter replacement — quoted $4,200</span><span class="t mono">Sat</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="note fx"><b>Ridgeline Roofing is a demonstration account.</b> It shows you what the
+      dashboard looks like and what it tracks. Your numbers will be your own.</div>
+   </div>
+  </section>
+
+  <!-- 05 · PRICING -->
+  <section class="psec" id="p5">
+   <div class="inner">
+    <div class="idx mono fx"><b>05</b> / Pricing</div>
+    <h2 class="chrome fx">ONE SETUP.<br>ONE MONTHLY.</h2>
+    <p class="dek fx">The setup gets it built and live. The monthly keeps it running and keeps me
+      on call. Month to month — cancel with 30 days' notice and the site stays yours.</p>
+
+    <div class="grid g3">
+      <div class="tier fx">
+        <div class="nm mono">Foundation</div>
+        <div class="setup">$1,495</div>
+        <div class="mo">+ $197 / month</div>
+        <div class="sub2 mono">One-time setup</div>
+        <ul>
+          <li>Missed-call text-back</li>
+          <li>Website, built &amp; live</li>
+          <li>Instant lead alerts</li>
+          <li>Hosting, backups, security</li>
+          <li>Text-me edits</li>
+        </ul>
+      </div>
+      <div class="tier feat fx">
+        <div class="flag mono">Most chosen</div>
+        <div class="nm mono">Growth</div>
+        <div class="setup">$1,995</div>
+        <div class="mo">+ $397 / month</div>
+        <div class="sub2 mono">One-time setup</div>
+        <ul>
+          <li>Everything in Foundation</li>
+          <li>Automatic review requests</li>
+          <li>Quote request form</li>
+          <li>Your live dashboard</li>
+          <li>Google Business Profile kept current</li>
+          <li>Monthly report — what it caught</li>
+        </ul>
+      </div>
+      <div class="tier fx">
+        <div class="nm mono">Command</div>
+        <div class="setup">$2,995</div>
+        <div class="mo">+ $697 / month</div>
+        <div class="sub2 mono">One-time setup</div>
+        <ul>
+          <li>Everything in Growth</li>
+          <li>Same-day priority changes</li>
+          <li>Seasonal landing pages</li>
+          <li>Monthly strategy call</li>
+          <li>Direct line to me</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note fx">Most contractors start on <b>Growth</b>. If one average job is worth more
+      than about $4,800 to you, the whole year pays for itself the first time it catches one.</div>
+   </div>
+  </section>
+
+  <!-- 06 · QUESTIONS -->
+  <section class="psec">
+   <div class="inner">
+    <div class="idx mono fx"><b>06</b> / Straight Answers</div>
+    <h2 class="chrome fx">WHAT YOU'RE<br>PROBABLY THINKING.</h2>
+    <div class="faq">
+      <details class="fx" open><summary>I already have a website.</summary>
+        <p>Most guys I talk to do, and I'm not knocking it. But your site doesn't text anybody back
+          when you're forty feet up a ladder — that's the part I'm talking about. I can leave your
+          site exactly where it is and put this on top of it.</p></details>
+      <details class="fx"><summary>Why is there a monthly fee?</summary>
+        <p>Because there's a monthly service. It's carrying a phone line, sending texts, hosting the
+          site, and me making whatever changes you want. If it were just a file sitting on a server
+          I'd charge you once and disappear — but then it wouldn't do anything for you.</p></details>
+      <details class="fx"><summary>Is this one of those AI chatbots?</summary>
+        <p>No. It's a text from your number saying you missed them and asking what they need. When
+          they write back, <em>you</em> answer. It's your customer and your conversation — nothing
+          pretends to be you.</p></details>
+      <details class="fx"><summary>What if it doesn't get me anything?</summary>
+        <p>Then you'd see that on the dashboard and you'd cancel, and you should. That's exactly why
+          the dashboard exists. I'd rather you be able to check than have to trust me.</p></details>
+      <details class="fx"><summary>Am I locked into a contract?</summary>
+        <p>No. Month to month, 30 days' notice. The website is yours either way — I'll hand over the
+          files. The phone automation stops when you stop paying for it, because it costs real money
+          to run.</p></details>
+      <details class="fx"><summary>I don't miss that many calls.</summary>
+        <p>Might be true. Easy to find out — for one week, every time your phone shows a missed call,
+          just notice it. Call me Friday with the number. <em>If it's two, I'll tell you not to buy
+          this.</em></p></details>
+    </div>
+   </div>
+  </section>
+
+  <!-- CLOSE -->
+  <section class="close">
+    <h2 class="fx">LET'S FIND OUT<br>WHAT YOU'RE <em>MISSING.</em></h2>
+    <p class="dek fx">Fifteen minutes on the phone. I'll ask what a job's worth to you and roughly
+      how many get away — you'll know the number by the end of the call. No pitch deck.</p>
+    <a class="bigcta fx" href="mailto:prestondarnell46@gmail.com?subject=Never%20Miss%20a%20Job%20-%20Quote%20Request">+ Get a Free Quote</a>
+  </section>
+
+  <footer><div class="mono">
+    Preston Scott Systems · Claremore, Oklahoma<br>
+    prestonscottsystems.com
+  </div></footer>
+
+</main>
 
 <script>
 /* =========================================================
@@ -409,7 +765,8 @@ function resize(force){
 }
 window.addEventListener('resize',()=>resize(false));
 
-const SECTIONS=5;
+const SECTIONS=1;                 /* hero only; product scrolls normally below */
+const scrollHintEl=document.getElementById('scrollHint');
 const world=document.getElementById('world');
 const secEls=[...document.querySelectorAll('.sec')];
 const railDots=[...document.querySelectorAll('#rail div')];
@@ -489,6 +846,7 @@ if(!IS_MOBILE){
     lastScroll=performance.now();
     if(snapT){clearTimeout(snapT);}
     snapT=setTimeout(()=>{
+      if(window.scrollY > VH*0.85) return;   /* past the hero: let it scroll freely */
       const sh=VH;
       const near=Math.round(window.scrollY/sh)*sh;
       if(Math.abs(window.scrollY-near)>4){
@@ -499,7 +857,8 @@ if(!IS_MOBILE){
 }
 
 railDots.forEach((d,i)=>d.addEventListener('click',()=>{
-  window.scrollTo({top:i*VH, behavior:'smooth'});
+  const t=document.getElementById('p'+(i+1));
+  if(t) window.scrollTo({top:t.offsetTop, behavior:'smooth'});
 }));
 
 /* ---------- mouse (card tilt + slight camera drift) ---------- */
@@ -520,10 +879,15 @@ function frame(nowMs){
   smoothY+=(window.scrollY-smoothY)*0.085;
   world.style.transform=`translateY(${-smoothY}px)`;
 
+  /* hand off from the cinematic hero to the product content */
+  const heroOut=Math.min(1,Math.max(0,(smoothY-VH*0.15)/(VH*0.55)));
+  cv.style.opacity=String(1-heroOut);
+  if(scrollHintEl) scrollHintEl.style.opacity=String(1-heroOut);
+
   const prog=smoothY/VH;                          // fractional section
   const active=Math.min(SECTIONS-1,Math.max(0,Math.round(prog)));
   secEls.forEach((s,i)=>s.classList.toggle('live', i===active));
-  railDots.forEach((d,i)=>d.classList.toggle('on', i===active));
+  /* rail 'on' state is driven by the product sections (see product script) */
 
   /* card tilt for active section */
   const tilt=secEls[active].querySelector('.tilt');
@@ -626,6 +990,133 @@ window.addEventListener('load',kickFilms);
 document.addEventListener('pointerdown',kickFilms);
 document.addEventListener('scroll',kickFilms,{once:true});
 setInterval(()=>{ films.forEach(v=>{ if(v.paused){ const p=v.play(); if(p&&p.catch) p.catch(()=>{}); } }); },3000);
+</script>
+<script>
+/* =========================================================
+   NEVER MISS A JOB — product section behaviour.
+   Runs below the hero cinematic; owns its own reveal, the
+   missed-call simulation, the ROI calculator, and the rail
+   state once you're past the hero.
+   ========================================================= */
+(function(){
+  const $ = s => document.querySelector(s);
+
+  /* ---------- scroll reveal ---------- */
+  const revealIO = new IntersectionObserver(es => es.forEach(e => {
+    if(e.isIntersecting){ e.target.classList.add('in'); revealIO.unobserve(e.target); }
+  }), {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('#product .fx').forEach((el,i) => {
+    el.style.transitionDelay = (i % 5) * 60 + 'ms';
+    revealIO.observe(el);
+  });
+
+  /* ---------- rail follows the product sections ---------- */
+  const dots = [...document.querySelectorAll('#rail div')];
+  const psecs = ['p1','p2','p3','p4','p5'].map(id => document.getElementById(id));
+  const railIO = new IntersectionObserver(es => es.forEach(e => {
+    if(e.isIntersecting){
+      const i = psecs.indexOf(e.target);
+      dots.forEach((d,j) => d.classList.toggle('on', j === i));
+    }
+  }), {threshold:.3});
+  psecs.forEach(s => s && railIO.observe(s));
+
+  /* ---------- missed-call simulation ---------- */
+  const screen = $('#screen'), simBtn = $('#sim');
+  const SCRIPT = [
+    {t:'stamp', v:'Today 2:47 PM'},
+    {t:'out',   v:"Hey, this is Ridgeline Roofing — sorry we missed your call, we're out on a job. What do you need done?"},
+    {t:'in2',   v:"hey! got some shingles off after that storm last night"},
+    {t:'in2',   v:"how soon could someone look at it"},
+    {t:'out',   v:"We can have somebody out tomorrow morning. What's the address?"},
+    {t:'in2',   v:"1412 N Sycamore. thank you!!"}
+  ];
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  let running = false;
+
+  const callCard = missed => '<div class="callcard">'
+    + '<div class="who">Incoming call</div>'
+    + '<div class="num">(918) 555-0164</div>'
+    + '<div class="st mono ' + (missed ? 'miss' : 'ring') + '">'
+    + (missed ? '✕ Missed · 2:47 PM' : '● Ringing') + '</div></div>';
+
+  async function play(){
+    if(running || !screen) return;
+    running = true; simBtn.disabled = true; simBtn.textContent = 'Playing…';
+    screen.innerHTML = callCard(false);
+    await wait(1800);
+    screen.innerHTML = callCard(true);
+    await wait(850);
+    const thread = document.createElement('div');
+    thread.className = 'thread';
+    screen.appendChild(thread);
+    for(const st of SCRIPT){
+      const el = document.createElement('div');
+      if(st.t === 'stamp'){
+        el.className = 'stamp mono'; el.textContent = st.v;
+        thread.appendChild(el); await wait(400); continue;
+      }
+      el.className = 'bub ' + st.t; el.textContent = st.v;
+      thread.appendChild(el);
+      await wait(st.t === 'out' ? 1500 : 1100);
+    }
+    simBtn.disabled = false; simBtn.textContent = '↻ Play it again'; running = false;
+  }
+
+  if(screen){
+    screen.innerHTML = callCard(true);
+    simBtn.addEventListener('click', play);
+    const simIO = new IntersectionObserver(es => es.forEach(e => {
+      if(e.isIntersecting){ play(); simIO.disconnect(); }
+    }), {threshold:.5});
+    simIO.observe($('#product .simwrap'));
+  }
+
+  /* ---------- ROI calculator ---------- */
+  const REPLY_RATE = 0.40, YEARLY_COST = 397 * 12;
+  const job = $('#job'), miss = $('#miss'), newpct = $('#newpct'), closer = $('#closer');
+  if(!job) return;
+  const money = n => '$' + Math.round(n).toLocaleString();
+
+  function calc(){
+    const j = +job.value, m = +miss.value,
+          n = +newpct.value / 100, c = +closer.value / 100;
+    $('#jobv').textContent    = money(j);
+    $('#missv').textContent   = m;
+    $('#newpctv').textContent = n * 100 + '%';
+    $('#closev').textContent  = c * 100 + '%';
+
+    const perMonth  = m * 4.33,
+          realLeads = perMonth * n,
+          recovered = realLeads * REPLY_RATE,
+          booked    = recovered * c,
+          yrJobs    = booked * 12,
+          yrRev     = yrJobs * j;
+
+    $('#lost').textContent = money(yrRev);
+    $('#detail').textContent =
+      'About ' + Math.round(perMonth) + ' missed calls a month — call it '
+      + realLeads.toFixed(1) + ' real prospects. Texting them back gets roughly '
+      + recovered.toFixed(1) + ' of those talking, and ' + booked.toFixed(1)
+      + ' book. That\'s about ' + yrJobs.toFixed(0)
+      + ' jobs a year you\'re not getting today.';
+
+    const need = YEARLY_COST / j, payoff = $('#payoff');
+    if(yrRev <= YEARLY_COST){
+      payoff.innerHTML = 'The system runs <b>' + money(YEARLY_COST) + '/yr</b> and at these '
+        + 'numbers brings back about <b>' + money(yrRev) + '</b>. <b>That\'s too close to be '
+        + 'worth it</b> — if this is really your situation, don\'t buy this.';
+    } else {
+      payoff.innerHTML = 'Growth costs <b>' + money(YEARLY_COST) + '/yr</b>. It pays for itself '
+        + 'the moment it saves <b>' + (need < 1.05 ? 'a single job' : need.toFixed(1) + ' jobs')
+        + '</b> — and at your numbers it\'s catching about <b>' + yrJobs.toFixed(0)
+        + ' a year.</b>';
+    }
+  }
+  [job, miss, newpct, closer].forEach(el => el.addEventListener('input', calc));
+  calc();
+})();
+
 </script>
 </body>
 </html>
