@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Never Miss a Job — PS×AI</title>
+<meta name="description" content="Every missed call is a job somebody else got. The system that texts them back in ten seconds.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0c;
+  --ink:#e8e6e1;
+  --ink-dim:#8a8a86;
+  --orange:#ff7a1a;
+  --line:rgba(232,230,225,0.12);
+  --card:#0d0d10;
+  --good:#5ad19a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);overflow-x:hidden;max-width:100vw;
+     font-family:Inter,-apple-system,"Segoe UI",sans-serif;font-weight:600;
+     -webkit-font-smoothing:antialiased}
+canvas#dust{position:fixed;inset:0;z-index:0;pointer-events:none}
+.mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;
+      letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+
+/* ---------- reveal ---------- */
+.fx{opacity:0;transform:translateY(30px);filter:blur(5px);
+    transition:opacity .8s ease,transform .8s ease,filter .8s ease}
+.fx.in{opacity:1;transform:none;filter:none}
+
+/* ---------- nav ---------- */
+nav{position:fixed;top:0;left:0;right:0;height:70px;z-index:50;padding:0 5vw;
+    display:flex;align-items:center;justify-content:space-between;
+    background:rgba(10,10,12,.72);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.mark{font-weight:800;font-size:19px;letter-spacing:-.02em;display:flex;align-items:center;gap:12px;
+      color:var(--ink);text-decoration:none}
+.mark x{color:var(--orange);font-weight:700;font-size:.82em;margin:0 -.06em;
+        display:inline-block;vertical-align:.04em}
+.badge{border:1px solid var(--line);border-radius:20px;padding:5px 12px;
+       font-size:9px;color:var(--ink-dim)}
+.nav-cta{white-space:nowrap;background:var(--orange);color:#0a0a0c;text-decoration:none;
+         border-radius:4px;padding:9px 14px;font-size:10px;font-weight:700}
+
+/* ---------- rail ---------- */
+.rail{position:fixed;right:2.4vw;top:50%;transform:translateY(-50%);z-index:40;
+      display:flex;flex-direction:column;gap:14px}
+.rail a{display:flex;align-items:center;gap:9px;text-decoration:none;
+        font-size:10px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;
+        letter-spacing:.12em;transition:color .3s}
+.rail i{display:block;width:14px;height:1px;background:var(--ink-dim);transition:all .3s}
+.rail a.on{color:var(--orange)}
+.rail a.on i{width:26px;background:var(--orange)}
+
+/* ---------- layout ---------- */
+.sec{padding:118px 5vw;position:relative;z-index:2}
+.inner{max-width:1080px;margin:0 auto}
+.kicker{text-align:center;font-size:11px;margin-bottom:26px}
+.kicker b{color:var(--orange);font-weight:700}
+.kicker span{color:var(--ink-dim)}
+h1,h2{font-weight:800;text-transform:uppercase;letter-spacing:-.045em;line-height:.94;
+      text-align:center}
+h2{font-size:clamp(34px,5.4vw,72px)}
+.chrome{background:linear-gradient(180deg,#e9e7e2 0%,#c6c4bf 34%,#918f8b 68%,#6d6b68 100%);
+        -webkit-background-clip:text;background-clip:text;color:transparent}
+.dek{text-align:center;color:var(--ink-dim);font-weight:600;font-size:clamp(15px,1.6vw,17px);
+     line-height:1.62;max-width:60ch;margin:26px auto 0}
+.dek b{color:var(--ink)}
+
+/* ---------- cards ---------- */
+.grid{display:grid;gap:20px;margin-top:52px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px;
+      position:relative;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.card h3{font-size:17px;font-weight:700;letter-spacing:-.01em;margin-bottom:14px}
+.card p{color:var(--ink-dim);font-size:14.5px;line-height:1.62;font-weight:600}
+.big{font-size:clamp(38px,5vw,52px);font-weight:800;letter-spacing:-.04em;line-height:1;
+     margin:6px 0 14px}
+.big em{font-style:normal;color:var(--orange)}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.tag{background:rgba(255,122,26,.13);border:1px solid rgba(255,122,26,.3);color:var(--orange);
+     border-radius:20px;padding:5px 11px;font-size:10px;font-weight:700}
+.clink{display:inline-flex;align-items:center;gap:7px;color:var(--orange);text-decoration:none;
+       font-size:11px;font-weight:700;margin-top:20px}
+.cnum{position:absolute;top:22px;right:24px;font-size:10px;color:#3a3a3e;
+      font-family:'JetBrains Mono',monospace;letter-spacing:.12em}
+
+/* ---------- phone sim ---------- */
+.simwrap{display:flex;flex-direction:column;align-items:center}
+.phone{width:262px;background:#050506;border:8px solid #1a1a1e;border-radius:34px;
+       box-shadow:0 30px 70px rgba(0,0,0,.6)}
+.notch{height:22px;display:flex;align-items:center;justify-content:center}
+.notch::after{content:"";width:86px;height:16px;background:#1a1a1e;border-radius:0 0 12px 12px}
+.pscreen{padding:6px 10px 16px;min-height:374px;display:flex;flex-direction:column}
+.callcard{background:#131317;border:1px solid var(--line);border-radius:13px;
+          padding:18px 12px;text-align:center;margin-bottom:11px}
+.callcard .who{font-weight:700;font-size:15px}
+.callcard .num{color:#5f5f5c;font-size:11px;margin-top:3px;
+               font-family:'JetBrains Mono',monospace}
+.st{font-size:10px;font-weight:700;margin-top:9px;letter-spacing:.12em;
+    font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+.st.miss{color:#ff5b4d}.st.ring{color:var(--orange)}
+.thread{display:flex;flex-direction:column;gap:7px}
+.bub{max-width:84%;padding:9px 12px;border-radius:15px;font-size:13px;line-height:1.45;
+     font-weight:600;opacity:0;transform:translateY(8px);animation:pop .34s ease forwards}
+@keyframes pop{to{opacity:1;transform:none}}
+.bub.out{align-self:flex-end;background:var(--orange);color:#170800;border-bottom-right-radius:4px}
+.bub.in{align-self:flex-start;background:#1b1b20;color:var(--ink);border-bottom-left-radius:4px}
+.stamp{font-size:9px;color:#4e4e52;text-align:center;padding:5px 0 1px;
+       font-family:'JetBrains Mono',monospace;letter-spacing:.12em}
+.simbtn{margin-top:18px;background:transparent;border:1px solid var(--line);color:var(--ink-dim);
+        border-radius:4px;padding:10px 16px;font-size:10px;cursor:pointer;
+        font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;
+        font-weight:500;transition:all .3s}
+.simbtn:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ---------- checklist ---------- */
+.chk{list-style:none;margin-top:4px}
+.chk li{display:flex;align-items:center;gap:12px;padding:9px 0;font-size:14px;font-weight:700}
+.chk .dot{width:20px;height:20px;border-radius:50%;background:var(--orange);color:#0a0a0c;
+          display:grid;place-items:center;font-size:11px;flex-shrink:0;font-weight:800}
+.chk .meta{margin-left:auto;font-size:10px;color:#5f5f5c;
+           font-family:'JetBrains Mono',monospace;letter-spacing:.12em}
+
+/* ---------- calculator ---------- */
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:52px}
+.field{margin-bottom:26px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:8px}
+.field .v{font-size:30px;font-weight:800;color:var(--orange);letter-spacing:-.03em;line-height:1}
+.field input[type=range]{width:100%;accent-color:var(--orange);height:4px;margin-top:12px}
+.field .hint{font-size:11.5px;color:#5f5f5c;font-weight:600;margin-top:9px;line-height:1.55}
+.out{display:flex;flex-direction:column;justify-content:center}
+.out .lab{font-size:10px;color:var(--ink-dim);margin-bottom:12px;
+          font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase}
+.out .money{font-size:clamp(40px,6vw,62px);font-weight:800;letter-spacing:-.045em;
+            line-height:1;color:#ff5b4d}
+.out .exp{color:var(--ink-dim);font-size:13.5px;line-height:1.62;margin-top:16px;font-weight:600}
+.payoff{border:1px solid rgba(90,209,154,.28);background:rgba(90,209,154,.07);border-radius:12px;
+        padding:16px;margin-top:22px;font-size:13.5px;line-height:1.6;color:#a9dfc6;font-weight:600}
+.payoff b{color:var(--good);font-weight:800}
+.assume{font-size:11px;color:#4e4e52;margin-top:16px;line-height:1.6;font-weight:600}
+
+/* ---------- dashboard ---------- */
+.dash{border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:52px;
+      background:var(--card);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.dbar{background:#111114;padding:13px 20px;border-bottom:1px solid var(--line);
+      display:flex;align-items:center;gap:8px}
+.dbar i{width:9px;height:9px;border-radius:50%;background:#2e2e33;display:block}
+.dbar span{margin-left:12px;font-size:10px;color:var(--ink-dim);
+           font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase}
+.dbody{padding:28px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.tile{background:#0a0a0c;border:1px solid var(--line);border-radius:12px;padding:18px}
+.tile .k{font-size:9px;color:#5f5f5c;font-family:'JetBrains Mono',monospace;
+         letter-spacing:.12em;text-transform:uppercase}
+.tile .n{font-size:32px;font-weight:800;letter-spacing:-.04em;margin-top:8px;line-height:1}
+.tile .s{font-size:10px;margin-top:7px;color:var(--good);font-weight:700}
+.tile.on .n{color:var(--good)}
+.tile.off .s{color:#5f5f5c}
+.feed{margin-top:24px;border-top:1px solid var(--line);padding-top:22px}
+.feed .h{font-size:9px;color:#5f5f5c;font-family:'JetBrains Mono',monospace;
+         letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px}
+.frow{display:flex;align-items:center;gap:14px;padding:11px 0;font-size:13.5px;font-weight:600;
+      border-bottom:1px solid rgba(232,230,225,.06);flex-wrap:wrap}
+.frow:last-child{border-bottom:0}
+.pill{font-size:9px;font-weight:700;padding:4px 9px;border-radius:20px;white-space:nowrap;
+      font-family:'JetBrains Mono',monospace;letter-spacing:.12em}
+.p-c{background:rgba(90,209,154,.14);color:var(--good)}
+.p-b{background:rgba(255,122,26,.14);color:var(--orange)}
+.p-r{background:rgba(150,170,255,.14);color:#9aaaff}
+.frow .who{font-weight:700;min-width:104px}
+.frow .d{color:var(--ink-dim)}
+.frow .t{margin-left:auto;font-size:10px;color:#4e4e52;
+         font-family:'JetBrains Mono',monospace;letter-spacing:.12em}
+.note{border-left:2px solid var(--orange);padding:12px 16px;margin-top:24px;
+      font-size:12.5px;color:var(--ink-dim);line-height:1.6;font-weight:600}
+.note b{color:var(--ink)}
+
+/* ---------- pricing ---------- */
+.tier{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px;
+      position:relative}
+.tier.feat{border-color:rgba(255,122,26,.42);box-shadow:0 0 44px rgba(255,122,26,.11)}
+.tier .nm{font-size:11px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;
+          letter-spacing:.12em;text-transform:uppercase}
+.tier .setup{font-size:40px;font-weight:800;letter-spacing:-.045em;margin-top:14px;line-height:1}
+.tier .mo{color:var(--orange);font-weight:800;font-size:16px;margin-top:8px}
+.tier .sub{font-size:10px;color:#4e4e52;margin-top:6px;
+           font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase}
+.tier ul{list-style:none;margin-top:22px;border-top:1px solid var(--line);padding-top:20px}
+.tier li{font-size:13.5px;color:var(--ink-dim);padding:7px 0 7px 24px;position:relative;
+         line-height:1.5;font-weight:600}
+.tier li::before{content:"";position:absolute;left:0;top:13px;width:10px;height:5px;
+  border-left:2px solid var(--orange);border-bottom:2px solid var(--orange);transform:rotate(-45deg)}
+.flag{position:absolute;top:-9px;left:28px;background:var(--orange);color:#0a0a0c;
+      font-size:9px;font-weight:700;padding:4px 10px;border-radius:3px;
+      font-family:'JetBrains Mono',monospace;letter-spacing:.12em}
+
+/* ---------- faq ---------- */
+.faq{max-width:800px;margin:52px auto 0}
+details{border-bottom:1px solid var(--line);padding:20px 0}
+summary{cursor:pointer;font-weight:700;font-size:15.5px;list-style:none;
+        display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--orange);font-size:20px;line-height:1;flex-shrink:0;
+               font-weight:700}
+details[open] summary::after{content:"–"}
+details p{color:var(--ink-dim);font-size:14.5px;line-height:1.68;margin-top:14px;font-weight:600}
+details em{color:var(--ink);font-style:normal}
+
+/* ---------- close ---------- */
+.close{text-align:center;padding:150px 5vw 130px;position:relative;z-index:2}
+.close h2{font-size:clamp(44px,7.4vw,104px);letter-spacing:-.045em;color:var(--ink);
+          -webkit-text-fill-color:currentColor}
+.bigcta{display:inline-block;margin-top:38px;background:var(--orange);color:#0a0a0c;
+        text-decoration:none;border-radius:6px;padding:15px 28px;font-size:13px;font-weight:700;
+        font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase}
+footer{border-top:1px solid var(--line);padding:34px 5vw;text-align:center;position:relative;z-index:2}
+footer .a{font-size:10px;color:#4e4e52;font-family:'JetBrains Mono',monospace;
+          letter-spacing:.12em;text-transform:uppercase;line-height:2}
+.scroll{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:40;
+        font-size:9px;color:#3a3a3e;font-family:'JetBrains Mono',monospace;letter-spacing:.24em}
+
+@media(max-width:900px){
+  .rail,.scroll{display:none}
+  .sec{padding:82px 6vw}
+  .g2,.g3,.calc{grid-template-columns:1fr}
+  .tiles{grid-template-columns:1fr 1fr}
+  .close{padding:100px 6vw 90px}
+  nav{padding:0 6vw}
+  .badge{display:none}
+}
+</style>
+</head>
+<body>
+<canvas id="dust"></canvas>
+
+<nav>
+  <a class="mark" href="/">PS<x>×</x>AI <span class="badge mono">OKLAHOMA</span></a>
+  <a class="nav-cta mono" href="mailto:prestondarnell46@gmail.com?subject=Never%20Miss%20a%20Job%20-%20Quote%20Request">+ Get a free quote</a>
+</nav>
+
+<div class="rail">
+  <a href="#s1" class="mono"><i></i>01</a>
+  <a href="#s2" class="mono"><i></i>02</a>
+  <a href="#s3" class="mono"><i></i>03</a>
+  <a href="#s4" class="mono"><i></i>04</a>
+  <a href="#s5" class="mono"><i></i>05</a>
+</div>
+<div class="scroll mono">Scroll</div>
+
+<!-- ============ 01 THE PROBLEM ============ -->
+<section class="sec" id="s1" style="padding-top:170px">
+  <div class="inner">
+    <div class="kicker mono fx"><b>01</b> <span>/ The problem</span></div>
+    <h2 class="chrome fx">Every missed call<br>is a job you lost.</h2>
+    <p class="dek fx">You're on a roof. Under a truck. In a crawlspace. The phone rings and you
+      can't get it — so they call the next guy and he books the job.
+      <b>This is the part that fixes that.</b></p>
+
+    <div class="grid g2">
+      <div class="card fx simwrap">
+        <div class="cnum">LIVE</div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="pscreen" id="screen"></div>
+        </div>
+        <button class="simbtn" id="sim">▶ Watch a call get saved</button>
+      </div>
+
+      <div class="card fx">
+        <div class="cnum">02</div>
+        <h3>What it does when you can't answer</h3>
+        <div class="big">10 sec <em>flat</em></div>
+        <p>They get a text from your number asking what they need. People answer texts. Almost
+          nobody leaves a voicemail anymore — they just call the next guy on the list.</p>
+        <ul class="chk">
+          <li><span class="dot">✓</span> Call comes in, goes unanswered <span class="meta">0 sec</span></li>
+          <li><span class="dot">✓</span> Text goes out automatically <span class="meta">10 sec</span></li>
+          <li><span class="dot">✓</span> They write back <span class="meta">2 min</span></li>
+          <li><span class="dot">✓</span> You pick it up when you're down <span class="meta">later</span></li>
+        </ul>
+        <div class="tags"><span class="tag mono">Nights</span><span class="tag mono">Weekends</span>
+          <span class="tag mono">24/7</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 THE MATH ============ -->
+<section class="sec" id="s2">
+  <div class="inner">
+    <div class="kicker mono fx"><b>02</b> <span>/ The math</span></div>
+    <h2 class="chrome fx">Run your own<br>numbers.</h2>
+    <p class="dek fx">Move the sliders to what's actually true for you. This isn't a sales figure —
+      it's your arithmetic, and if it doesn't add up it'll tell you so.</p>
+
+    <div class="calc">
+      <div class="card fx">
+        <div class="cnum">INPUT</div>
+        <div class="field">
+          <label for="job">What's an average job worth to you?</label>
+          <div class="v" id="jobv">$4,500</div>
+          <input type="range" id="job" min="500" max="25000" step="250" value="4500">
+          <div class="hint">Your typical ticket — not your biggest, not your smallest.</div>
+        </div>
+        <div class="field">
+          <label for="miss">Calls you miss in a normal week</label>
+          <div class="v" id="missv">5</div>
+          <input type="range" id="miss" min="1" max="40" step="1" value="5">
+          <div class="hint">Voicemails, hang-ups, and after-hours rings.</div>
+        </div>
+        <div class="field">
+          <label for="newpct">How many of those are new customers wanting work?</label>
+          <div class="v" id="newpctv">35%</div>
+          <input type="range" id="newpct" min="10" max="80" step="5" value="35">
+          <div class="hint">The rest are suppliers, existing customers, spam and wrong numbers.
+            Those don't count, so we leave them out.</div>
+        </div>
+        <div class="field">
+          <label for="close">Of the new ones you reach, how many book?</label>
+          <div class="v" id="closev">25%</div>
+          <input type="range" id="close" min="5" max="70" step="5" value="25">
+        </div>
+      </div>
+
+      <div class="card out fx">
+        <div class="cnum">RESULT</div>
+        <div class="lab">Walking out the door each year</div>
+        <div class="money" id="lost">$0</div>
+        <div class="exp" id="detail"></div>
+        <div class="payoff" id="payoff"></div>
+        <div class="assume">The one number you didn't set: we assume 40% of people who get an
+          instant text write back. The rest were never going to answer anyway. Defaults here are
+          deliberately conservative — most owners miss more calls than they think. This is a model
+          built from your numbers, not a promise of results.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 THE SYSTEM ============ -->
+<section class="sec" id="s3">
+  <div class="inner">
+    <div class="kicker mono fx"><b>03</b> <span>/ The system</span></div>
+    <h2 class="chrome fx">It's not a website.<br>It's what catches the work.</h2>
+    <p class="dek fx">A website sits there and waits. This does something. You get the site
+      too — the site is just the smallest part of it.</p>
+
+    <div class="grid g3">
+      <div class="card fx"><div class="cnum">01</div><h3>Missed-call text-back</h3>
+        <p>Somebody calls, you can't pick up. Ten seconds later they get a text from your number:
+          "Sorry we missed you — what do you need done?"</p></div>
+      <div class="card fx"><div class="cnum">02</div><h3>Instant lead alerts</h3>
+        <p>Anyone who texts in or fills out your form hits your phone immediately. No inbox to
+          check at 9pm. No lead sitting for two days going cold.</p></div>
+      <div class="card fx"><div class="cnum">03</div><h3>A site built to get called</h3>
+        <p>Fast on rural cell service, tap-to-call at the top, your real photos and real reviews.
+          Built for somebody standing in their driveway looking at a problem.</p></div>
+      <div class="card fx"><div class="cnum">04</div><h3>Review engine</h3>
+        <p>After a finished job the customer gets a friendly text asking for a Google review.
+          Reviews are why the next person picks you. Most shops just never ask.</p></div>
+      <div class="card fx"><div class="cnum">05</div><h3>Your dashboard</h3>
+        <p>One link. Calls caught, leads in, reviews gained, jobs booked. You can check whether
+          it's working without taking my word for anything.</p></div>
+      <div class="card fx"><div class="cnum">06</div><h3>I keep it running</h3>
+        <p>Hosting, backups, security, and any change you want — new photos, new prices, a service
+          you added. You text me, it gets done. That's the monthly.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 THE PROOF ============ -->
+<section class="sec" id="s4">
+  <div class="inner">
+    <div class="kicker mono fx"><b>04</b> <span>/ The proof</span></div>
+    <h2 class="chrome fx">You can see<br>it working.</h2>
+    <p class="dek fx">Most marketing spends your money and hands you a shrug. You get a page that
+      shows exactly what got caught, who it was, and what happened next.</p>
+
+    <div class="dash fx">
+      <div class="dbar"><i></i><i></i><i></i><span>Ridgeline Roofing — this month</span></div>
+      <div class="dbody">
+        <div class="tiles">
+          <div class="tile off"><div class="k">Calls missed</div><div class="n">23</div>
+            <div class="s">would've been gone</div></div>
+          <div class="tile on"><div class="k">Texted back</div><div class="n">23</div>
+            <div class="s">100% — automatic</div></div>
+          <div class="tile on"><div class="k">Wrote back</div><div class="n">9</div>
+            <div class="s">real conversations</div></div>
+          <div class="tile on"><div class="k">Booked</div><div class="n">3</div>
+            <div class="s">jobs you'd have lost</div></div>
+        </div>
+        <div class="feed">
+          <div class="h">Recent activity</div>
+          <div class="frow"><span class="pill p-c">Caught</span><span class="who">(918) 555-0164</span>
+            <span class="d">Texted back in 8 seconds</span><span class="t">4:12p</span></div>
+          <div class="frow"><span class="pill p-b">Booked</span><span class="who">Dana W.</span>
+            <span class="d">Hail damage inspection — Thursday</span><span class="t">11:40a</span></div>
+          <div class="frow"><span class="pill p-r">Review</span><span class="who">Marcus T.</span>
+            <span class="d">Left 5 stars on Google</span><span class="t">Yest</span></div>
+          <div class="frow"><span class="pill p-c">Caught</span><span class="who">(539) 555-0102</span>
+            <span class="d">After hours — 9:47pm Saturday</span><span class="t">Sat</span></div>
+          <div class="frow"><span class="pill p-b">Booked</span><span class="who">Ellis Property</span>
+            <span class="d">Gutter replacement — quoted $4,200</span><span class="t">Sat</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="note fx"><b>Ridgeline Roofing is a demonstration account.</b> It shows you what the
+      dashboard looks like and what it tracks. Your numbers will be your own.</div>
+  </div>
+</section>
+
+<!-- ============ 05 PRICING ============ -->
+<section class="sec" id="s5">
+  <div class="inner">
+    <div class="kicker mono fx"><b>05</b> <span>/ Pricing</span></div>
+    <h2 class="chrome fx">One setup.<br>One monthly.</h2>
+    <p class="dek fx">The setup gets it built and live. The monthly keeps it running and keeps me
+      on call. Month to month — cancel with 30 days' notice and the site stays yours.</p>
+
+    <div class="grid g3" id="pricing">
+      <div class="tier fx">
+        <div class="nm">Foundation</div>
+        <div class="setup">$1,495</div>
+        <div class="mo">+ $197 / month</div>
+        <div class="sub">One-time setup</div>
+        <ul>
+          <li>Missed-call text-back</li>
+          <li>Website, built &amp; live</li>
+          <li>Instant lead alerts</li>
+          <li>Hosting, backups, security</li>
+          <li>Text-me edits</li>
+        </ul>
+      </div>
+      <div class="tier feat fx">
+        <div class="flag">Most chosen</div>
+        <div class="nm">Growth</div>
+        <div class="setup">$1,995</div>
+        <div class="mo">+ $397 / month</div>
+        <div class="sub">One-time setup</div>
+        <ul>
+          <li>Everything in Foundation</li>
+          <li>Automatic review requests</li>
+          <li>Quote request form</li>
+          <li>Your live dashboard</li>
+          <li>Google Business Profile kept current</li>
+          <li>Monthly report — what it caught</li>
+        </ul>
+      </div>
+      <div class="tier fx">
+        <div class="nm">Command</div>
+        <div class="setup">$2,995</div>
+        <div class="mo">+ $697 / month</div>
+        <div class="sub">One-time setup</div>
+        <ul>
+          <li>Everything in Growth</li>
+          <li>Same-day priority changes</li>
+          <li>Seasonal landing pages</li>
+          <li>Monthly strategy call</li>
+          <li>Direct line to me</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note fx">Most contractors start on <b>Growth</b>. If one average job is worth more
+      than about $4,800 to you, the whole year pays for itself the first time it catches one.</div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="sec">
+  <div class="inner">
+    <div class="kicker mono fx"><b>06</b> <span>/ Straight answers</span></div>
+    <h2 class="chrome fx">What you're<br>probably thinking.</h2>
+    <div class="faq">
+      <details class="fx" open><summary>I already have a website.</summary>
+        <p>Most guys I talk to do, and I'm not knocking it. But your site doesn't text anybody back
+          when you're forty feet up a ladder — that's the part I'm talking about. I can leave your
+          site exactly where it is and put this on top of it.</p></details>
+      <details class="fx"><summary>Why is there a monthly fee?</summary>
+        <p>Because there's a monthly service. It's carrying a phone line, sending texts, hosting the
+          site, and me making whatever changes you want. If it were just a file sitting on a server
+          I'd charge you once and disappear — but then it wouldn't do anything for you.</p></details>
+      <details class="fx"><summary>Is this one of those AI chatbots?</summary>
+        <p>No. It's a text from your number saying you missed them and asking what they need. When
+          they write back, <em>you</em> answer. It's your customer and your conversation — nothing
+          pretends to be you.</p></details>
+      <details class="fx"><summary>What if it doesn't get me anything?</summary>
+        <p>Then you'd see that on the dashboard and you'd cancel, and you should. That's exactly why
+          the dashboard exists. I'd rather you be able to check than have to trust me.</p></details>
+      <details class="fx"><summary>Am I locked into a contract?</summary>
+        <p>No. Month to month, 30 days' notice. The website is yours either way — I'll hand over the
+          files. The phone automation stops when you stop paying for it, because it costs real money
+          to run.</p></details>
+      <details class="fx"><summary>I don't miss that many calls.</summary>
+        <p>Might be true. Easy to find out — for one week, every time your phone shows a missed call,
+          just notice it. Call me Friday with the number. <em>If it's two, I'll tell you not to buy
+          this.</em></p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CLOSE ============ -->
+<section class="close">
+  <h2 class="fx">Let's find out<br>what you're missing.</h2>
+  <p class="dek fx">Fifteen minutes on the phone. I'll ask what a job's worth to you and roughly how
+    many get away — you'll know the number by the end of the call. No pitch deck.</p>
+  <a class="bigcta fx" href="mailto:prestondarnell46@gmail.com?subject=Never%20Miss%20a%20Job%20-%20Quote%20Request">+ Get a free quote</a>
+</section>
+
+<footer><div class="a">
+  Preston Scott Systems · Claremore, Oklahoma<br>
+  Built for people who work with their hands.
+</div></footer>
+
+<script>
+/* ---------- dust field ---------- */
+(function(){
+  const c = document.getElementById('dust'), x = c.getContext('2d');
+  let w, h, pts;
+  function init(){
+    w = c.width = innerWidth; h = c.height = innerHeight;
+    pts = Array.from({length: Math.min(150, Math.round(w * h / 14000))}, () => ({
+      x: Math.random() * w, y: Math.random() * h,
+      r: Math.random() * 1.1 + .2,
+      s: Math.random() * .16 + .03,
+      o: Math.random() * .5 + .12,
+      g: Math.random() < .08
+    }));
+  }
+  function draw(){
+    x.clearRect(0, 0, w, h);
+    for(const p of pts){
+      p.y -= p.s;
+      if(p.y < -4){ p.y = h + 4; p.x = Math.random() * w; }
+      x.fillStyle = p.g ? 'rgba(255,122,26,' + p.o + ')' : 'rgba(232,230,225,' + p.o * .6 + ')';
+      x.fillRect(p.x, p.y, p.r, p.r);
+    }
+    requestAnimationFrame(draw);
+  }
+  init(); draw();
+  addEventListener('resize', init);
+})();
+
+/* ---------- scroll reveal ---------- */
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+}), {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.fx').forEach((el, i) => {
+  el.style.transitionDelay = (i % 6) * 60 + 'ms';
+  io.observe(el);
+});
+
+/* ---------- rail ---------- */
+const rail = [...document.querySelectorAll('.rail a')];
+const secs = ['s1','s2','s3','s4','s5'].map(id => document.getElementById(id));
+const railIO = new IntersectionObserver(es => es.forEach(e => {
+  if(e.isIntersecting){
+    const i = secs.indexOf(e.target);
+    rail.forEach((a, j) => a.classList.toggle('on', j === i));
+  }
+}), {threshold:.35});
+secs.forEach(s => railIO.observe(s));
+
+/* ---------- missed-call simulation ---------- */
+const screen = document.getElementById('screen'), simBtn = document.getElementById('sim');
+const SCRIPT = [
+  {t:'stamp', v:'Today 2:47 PM'},
+  {t:'out',  v:"Hey, this is Ridgeline Roofing — sorry we missed your call, we're out on a job. What do you need done?"},
+  {t:'in',   v:"hey! got some shingles off after that storm last night"},
+  {t:'in',   v:"how soon could someone look at it"},
+  {t:'out',  v:"We can have somebody out tomorrow morning. What's the address?"},
+  {t:'in',   v:"1412 N Sycamore. thank you!!"}
+];
+const wait = ms => new Promise(r => setTimeout(r, ms));
+let running = false;
+
+const callCard = missed => `<div class="callcard">
+  <div class="who">Incoming call</div>
+  <div class="num">(918) 555-0164</div>
+  <div class="st mono ${missed ? 'miss' : 'ring'}">${missed ? '✕ Missed · 2:47 PM' : '● Ringing'}</div>
+</div>`;
+
+async function play(){
+  if(running) return;
+  running = true; simBtn.disabled = true; simBtn.textContent = 'Playing…';
+  screen.innerHTML = callCard(false);
+  await wait(1800);
+  screen.innerHTML = callCard(true);
+  await wait(850);
+  const thread = document.createElement('div');
+  thread.className = 'thread';
+  screen.appendChild(thread);
+  for(const st of SCRIPT){
+    const el = document.createElement('div');
+    if(st.t === 'stamp'){ el.className = 'stamp mono'; el.textContent = st.v; thread.appendChild(el); await wait(400); continue; }
+    el.className = 'bub ' + st.t; el.textContent = st.v;
+    thread.appendChild(el);
+    await wait(st.t === 'out' ? 1500 : 1100);
+  }
+  simBtn.disabled = false; simBtn.textContent = '↻ Play it again'; running = false;
+}
+simBtn.addEventListener('click', play);
+screen.innerHTML = callCard(true);
+new IntersectionObserver((es, ob) => es.forEach(e => {
+  if(e.isIntersecting){ play(); ob.disconnect(); }
+}), {threshold:.5}).observe(document.querySelector('.simwrap'));
+
+/* ---------- calculator ---------- */
+const REPLY_RATE = 0.40, YEARLY_COST = 397 * 12;
+const job = document.getElementById('job'), miss = document.getElementById('miss'),
+      newpct = document.getElementById('newpct'), close_ = document.getElementById('close');
+const money = n => '$' + Math.round(n).toLocaleString();
+
+function calc(){
+  const j = +job.value, m = +miss.value, n = +newpct.value / 100, c = +close_.value / 100;
+  document.getElementById('jobv').textContent    = money(j);
+  document.getElementById('missv').textContent   = m;
+  document.getElementById('newpctv').textContent = n * 100 + '%';
+  document.getElementById('closev').textContent  = c * 100 + '%';
+
+  const perMonth  = m * 4.33,
+        realLeads = perMonth * n,
+        recovered = realLeads * REPLY_RATE,
+        booked    = recovered * c,
+        yrJobs    = booked * 12,
+        yrRev     = yrJobs * j;
+
+  document.getElementById('lost').textContent = money(yrRev);
+  document.getElementById('detail').textContent =
+    `About ${Math.round(perMonth)} missed calls a month — call it ${realLeads.toFixed(1)} real `
+    + `prospects. Texting them back gets roughly ${recovered.toFixed(1)} of those talking, and `
+    + `${booked.toFixed(1)} book. That's about ${yrJobs.toFixed(0)} jobs a year you're not getting today.`;
+
+  const need = YEARLY_COST / j, payoff = document.getElementById('payoff');
+  if(yrRev <= YEARLY_COST){
+    payoff.innerHTML = `The system runs <b>${money(YEARLY_COST)}/yr</b> and at these numbers brings `
+      + `back about <b>${money(yrRev)}</b>. <b>That's too close to be worth it</b> — if this is `
+      + `really your situation, don't buy this.`;
+  } else {
+    payoff.innerHTML = `Growth costs <b>${money(YEARLY_COST)}/yr</b>. It pays for itself the moment `
+      + `it saves <b>${need < 1.05 ? 'a single job' : need.toFixed(1) + ' jobs'}</b> — and at your `
+      + `numbers it's catching about <b>${yrJobs.toFixed(0)} a year.</b>`;
+  }
+}
+[job, miss, newpct, close_].forEach(el => el.addEventListener('input', calc));
+calc();
+</script>
+</body>
+</html>

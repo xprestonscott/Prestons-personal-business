@@ -7,6 +7,11 @@ app = Flask(__name__)
 def home():
     return render_template('index.html')
 
+@app.route('/system')
+def system():
+    """Never Miss a Job — the productized missed-call/lead-capture offer."""
+    return render_template('system.html')
+
 @app.route('/submit', methods=['POST'])
 def submit():
     # Basic handler so the form doesn't crash if it's wired up later.
