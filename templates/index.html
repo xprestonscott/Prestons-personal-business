@@ -436,6 +436,16 @@
     border:1px solid rgba(255,122,26,.42); background:rgba(255,122,26,.10);
     color:var(--orange); border-radius:20px; font-size:11px; font-weight:700;
     font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;}
+
+  #product .ctarow{display:flex; gap:14px; justify-content:center; align-items:center;
+    flex-wrap:wrap; margin-top:34px;}
+  #product .bigcta{margin-top:0;}
+  #product .altcta{color:var(--ink-dim); text-decoration:none; font-size:11px;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;
+    border-bottom:1px solid var(--line); padding-bottom:2px;}
+  #product .altcta:hover{color:var(--orange);}
+  #product footer a{color:var(--ink-dim); text-decoration:none;}
+  #product footer a:hover{color:var(--orange);}
 </style>
 </head>
 <body>
@@ -446,7 +456,7 @@
     <div class="logo">PS<span>×</span>AI</div>
     <div class="nav-tag mono">Oklahoma</div>
   </div>
-  <a class="nav-cta mono" href="mailto:prestondarnell46@gmail.com?subject=Free%20Quote%20Request">+ Get a Free Quote</a>
+  <a class="nav-cta mono" href="tel:+19183730512">+ Call or text (918) 373-0512</a>
 </nav>
 
 <div id="rail" class="mono">
@@ -725,12 +735,15 @@
     <h2 class="fx">LET'S FIND OUT<br>WHAT YOU'RE <em>MISSING.</em></h2>
     <p class="dek fx">Fifteen minutes on the phone. I'll ask what a job's worth to you and roughly
       how many get away — you'll know the number by the end of the call. No pitch deck.</p>
-    <a class="bigcta fx" href="mailto:prestondarnell46@gmail.com?subject=Never%20Miss%20a%20Job%20-%20Quote%20Request">+ Get a Free Quote</a>
+    <div class="ctarow fx">
+      <a class="bigcta" href="tel:+19183730512">+ Call or text (918) 373-0512</a>
+      <a class="altcta" href="mailto:prestondarnell46@gmail.com?subject=Never%20Miss%20a%20Job%20-%20Quote%20Request">or email me</a>
+    </div>
   </section>
 
   <footer><div class="mono">
     Preston Scott Systems · Claremore, Oklahoma<br>
-    prestonscottsystems.com
+    <a href="tel:+19183730512">(918) 373-0512</a> · prestonscottsystems.com
   </div></footer>
 
 </main>
