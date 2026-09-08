@@ -308,31 +308,9 @@
 
   .stage{padding-top:64px;}
 
-  /* Concept switching. `display` can't be transitioned, so the panel is shown
-     for the whole animation and only opacity/transform move; .is-out is the
-     outgoing state, .is-in the pre-entry state that gets cleared on the next
-     frame to trigger the transition in. */
+  /* Concept switching is instant — no fade, no slide, no scroll animation. */
   .concept{display:none;}
-  .concept.live{
-    display:block;
-    opacity:1; transform:none; filter:blur(0);
-    transition:opacity .42s cubic-bezier(.22,.61,.36,1),
-               transform .42s cubic-bezier(.22,.61,.36,1),
-               filter .42s ease;
-  }
-  .concept.live.is-out{opacity:0; transform:translateY(-14px); filter:blur(6px);}
-  .concept.live.is-in{opacity:0; transform:translateY(22px); filter:blur(6px);}
-
-  /* the pill's own state change should feel like part of the same move */
-  #switch button{transition:background .32s ease, border-color .32s ease,
-                            color .32s ease, transform .32s ease;}
-  #switch button.on{transform:translateY(-1px);}
-
-  @media (prefers-reduced-motion:reduce){
-    .concept.live,
-    .concept.live.is-out,
-    .concept.live.is-in{transition:none; opacity:1; transform:none; filter:none;}
-  }
+  .concept.live{display:block;}
 
 
   /* ===== shared page furniture, mirroring #product ===== */
@@ -1422,51 +1400,23 @@ setInterval(()=>{ films.forEach(v=>{ if(v.paused){ const p=v.play(); if(p&&p.cat
 <script>
 /* ---------- concept switcher ---------- */
 (function(){
-  var OUT = 260, busy = false;
-  var reduce = window.matchMedia &&
-               window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function swap(btn){
-    var next = document.getElementById('c-' + btn.dataset.c);
-    var cur  = document.querySelector('.concept.live');
-    if(busy || !next || next === cur) return;
-    busy = true;
-
-    document.querySelectorAll('#switch button').forEach(function(x){
-      x.classList.toggle('on', x === btn);
-    });
-
-    /* Land at the top of the content rather than the top of the document —
-       scrolling back through the whole hero on every switch feels like a
-       page reload, which is the opposite of what this should feel like. */
-    var product = document.getElementById('product');
-    var top = product ? product.offsetTop : 0;
-    if(window.scrollY > top) window.scrollTo({top: top, behavior: 'smooth'});
-
-    if(reduce){
-      if(cur) cur.classList.remove('live');
-      next.classList.add('live');
-      busy = false;
-      return;
-    }
-
-    if(cur) cur.classList.add('is-out');
-
-    setTimeout(function(){
-      if(cur){ cur.classList.remove('live','is-out'); }
-      next.classList.add('live','is-in');
-      /* two frames: one to commit the pre-entry state, one to animate off it */
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){
-          next.classList.remove('is-in');
-          busy = false;
-        });
-      });
-    }, OUT);
-  }
-
+  /* Straight swap. No fade, no slide, no smooth scroll — the panel is just
+     replaced and the view jumps to the top of the content. */
   document.querySelectorAll('#switch button').forEach(function(b){
-    b.addEventListener('click', function(){ swap(b); });
+    b.addEventListener('click', function(){
+      var next = document.getElementById('c-' + b.dataset.c);
+      if(!next) return;
+
+      document.querySelectorAll('#switch button').forEach(function(x){
+        x.classList.toggle('on', x === b);
+      });
+      document.querySelectorAll('.concept').forEach(function(c){
+        c.classList.toggle('live', c === next);
+      });
+
+      var product = document.getElementById('product');
+      window.scrollTo(0, product ? product.offsetTop : 0);
+    });
   });
 })();
 
