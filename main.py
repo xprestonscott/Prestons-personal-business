@@ -5,6 +5,17 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
+    """The sell-websites page: hero cinematic + the three concepts.
+
+    NOTE: the concept switcher (01/02/03) is visible to real visitors here.
+    Once a concept is chosen, drop the other two and delete #switch.
+    """
+    return render_template('work.html')
+
+@app.route('/classic')
+def classic():
+    """The previous homepage — hero + Never Miss a Job. Kept so nothing that
+    was live before this switch is lost."""
     return render_template('index.html')
 
 @app.route('/system')

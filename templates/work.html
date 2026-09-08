@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Preston Scott Systems — Website-Sales Model Concepts</title>
-<!-- Working draft on a live domain: three competing offers on one page would
-     be a bad search result for the business. Keep it out of the index until
-     one of them is chosen and promoted to the homepage. -->
-<meta name="robots" content="noindex, nofollow" />
+<title>Preston Scott — Custom Websites for Small Businesses</title>
+<meta name="description" content="Custom websites for small businesses. Built from scratch, fast, mobile, and set up to be found. You own the code, the content and the domain." />
+<!-- No robots meta: this is the homepage now, and a noindex here would take
+     the whole site out of search. See the note in main.py about the concept
+     switcher still being visible to real visitors. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -307,19 +307,34 @@
   #switch button.on{background:var(--orange); border-color:var(--orange); color:#0a0a0c; font-weight:700;}
 
   .stage{padding-top:64px;}
+
+  /* Concept switching. `display` can't be transitioned, so the panel is shown
+     for the whole animation and only opacity/transform move; .is-out is the
+     outgoing state, .is-in the pre-entry state that gets cleared on the next
+     frame to trigger the transition in. */
   .concept{display:none;}
-  .concept.live{display:block;}
+  .concept.live{
+    display:block;
+    opacity:1; transform:none; filter:blur(0);
+    transition:opacity .42s cubic-bezier(.22,.61,.36,1),
+               transform .42s cubic-bezier(.22,.61,.36,1),
+               filter .42s ease;
+  }
+  .concept.live.is-out{opacity:0; transform:translateY(-14px); filter:blur(6px);}
+  .concept.live.is-in{opacity:0; transform:translateY(22px); filter:blur(6px);}
+
+  /* the pill's own state change should feel like part of the same move */
+  #switch button{transition:background .32s ease, border-color .32s ease,
+                            color .32s ease, transform .32s ease;}
+  #switch button.on{transform:translateY(-1px);}
+
+  @media (prefers-reduced-motion:reduce){
+    .concept.live,
+    .concept.live.is-out,
+    .concept.live.is-in{transition:none; opacity:1; transform:none; filter:none;}
+  }
 
   /* the "this replaces the sections under your hero" reminder strip */
-  .heronote{
-    border-bottom:1px solid var(--line); background:#08080a;
-    padding:26px 5vw; text-align:center;
-  }
-  .heronote .k{font-size:10px; color:#4e4e52; font-family:'JetBrains Mono',monospace;
-    letter-spacing:.12em; text-transform:uppercase;}
-  .heronote .t{font-size:13px; color:var(--ink-dim); font-weight:600; margin-top:10px;
-    max-width:62ch; margin-left:auto; margin-right:auto; line-height:1.7;}
-  .heronote .t b{color:var(--ink);}
 
   /* ===== shared page furniture, mirroring #product ===== */
   .psec{padding:104px 5vw; position:relative;}
@@ -644,8 +659,6 @@
      Seed's package structure, your voice. Straight product page.
      ================================================================ -->
 <div class="concept live" id="c-a">
-  <div class="heronote">
-    <div class="k">Your hero cinematic stays exactly as it is</div>
     <div class="t">Everything below replaces the <b>Never Miss a Job</b> sections under it.
       Same particle <b>PS×AI</b> assembly, same BUILT TO RUN, same scroll — only the offer changes.</div>
   </div>
@@ -831,8 +844,6 @@
      retargeted from missed calls to an outdated/invisible website.
      ================================================================ -->
 <div class="concept" id="c-b">
-  <div class="heronote">
-    <div class="k">Your hero cinematic stays exactly as it is</div>
     <div class="t">Same structure as concept 01 — but the <b>interactive loss demo leads</b>,
       the way the Never Miss a Job calculator does now. The prospect sees the number before
       they see a price.</div>
@@ -1005,8 +1016,6 @@
      Price-anchoring play built directly on the Seed Technologies research.
      ================================================================ -->
 <div class="concept" id="c-c">
-  <div class="heronote">
-    <div class="k">Your hero cinematic stays exactly as it is</div>
     <div class="t">This one <b>anchors against the Tulsa agencies</b> instead of against
       cheap freelancers. It only works if your build quality genuinely matches theirs — which is
       the argument for taking the internship first.</div>
@@ -1427,15 +1436,54 @@ setInterval(()=>{ films.forEach(v=>{ if(v.paused){ const p=v.play(); if(p&&p.cat
 </script>
 <script>
 /* ---------- concept switcher ---------- */
-document.querySelectorAll('#switch button').forEach(function(b){
-  b.addEventListener('click', function(){
-    document.querySelectorAll('#switch button').forEach(function(x){x.classList.remove('on');});
-    b.classList.add('on');
-    document.querySelectorAll('.concept').forEach(function(c){c.classList.remove('live');});
-    document.getElementById('c-'+b.dataset.c).classList.add('live');
-    window.scrollTo(0,0);
+(function(){
+  var OUT = 260, busy = false;
+  var reduce = window.matchMedia &&
+               window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function swap(btn){
+    var next = document.getElementById('c-' + btn.dataset.c);
+    var cur  = document.querySelector('.concept.live');
+    if(busy || !next || next === cur) return;
+    busy = true;
+
+    document.querySelectorAll('#switch button').forEach(function(x){
+      x.classList.toggle('on', x === btn);
+    });
+
+    /* Land at the top of the content rather than the top of the document —
+       scrolling back through the whole hero on every switch feels like a
+       page reload, which is the opposite of what this should feel like. */
+    var product = document.getElementById('product');
+    var top = product ? product.offsetTop : 0;
+    if(window.scrollY > top) window.scrollTo({top: top, behavior: 'smooth'});
+
+    if(reduce){
+      if(cur) cur.classList.remove('live');
+      next.classList.add('live');
+      busy = false;
+      return;
+    }
+
+    if(cur) cur.classList.add('is-out');
+
+    setTimeout(function(){
+      if(cur){ cur.classList.remove('live','is-out'); }
+      next.classList.add('live','is-in');
+      /* two frames: one to commit the pre-entry state, one to animate off it */
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          next.classList.remove('is-in');
+          busy = false;
+        });
+      });
+    }, OUT);
+  }
+
+  document.querySelectorAll('#switch button').forEach(function(b){
+    b.addEventListener('click', function(){ swap(b); });
   });
-});
+})();
 
 var usd = function(n){ return '$' + Math.round(n).toLocaleString('en-US'); };
 
