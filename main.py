@@ -12,6 +12,12 @@ def system():
     """Never Miss a Job — the productized missed-call/lead-capture offer."""
     return render_template('system.html')
 
+@app.route('/work')
+def work():
+    """Working draft: three concepts for the sell-websites model, plus the
+    anonymised work gallery. Not linked from anywhere and noindexed."""
+    return render_template('work.html')
+
 @app.route('/submit', methods=['POST'])
 def submit():
     # Basic handler so the form doesn't crash if it's wired up later.

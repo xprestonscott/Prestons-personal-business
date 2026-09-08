@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Preston Scott Systems — Website-Sales Model Concepts</title>
+<!-- Working draft on a live domain: three competing offers on one page would
+     be a bad search result for the business. Keep it out of the index until
+     one of them is chosen and promoted to the homepage. -->
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== Preston Scott Systems design tokens — lifted verbatim from templates/index.html ===== */
+  :root{
+    --bg:#0a0a0c;
+    --ink:#e8e6e1;
+    --ink-dim:#8a8a86;
+    --orange:#ff7a1a;
+    --line:rgba(232,230,225,0.12);
+    --card:#0d0d10;
+    --good:#5ad19a;
+    --bad:#ff5b4d;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{overflow-x:hidden; max-width:100vw;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Inter',-apple-system,'Segoe UI',sans-serif;
+  }
+  .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;
+    letter-spacing:0.12em; text-transform:uppercase;}
+
+  h1,h2{font-weight:800; letter-spacing:-0.045em; line-height:0.96;}
+  .chrome{
+    background:linear-gradient(110deg,
+      #55555c 0%, #9a9aa2 18%, #ffffff 32%, #b9bac2 44%,
+      #55555c 60%, #9a9aa2 78%, #eceef2 92%, #55555c 100%);
+    background-size:250% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:sheen 6s linear infinite;
+  }
+  @keyframes sheen{from{background-position:0% 0;}to{background-position:250% 0;}}
+
+  /* ===== concept switcher (scaffolding — not part of any concept) ===== */
+  #switch{
+    position:fixed; top:0; left:0; right:0; z-index:90;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    padding:12px 22px;
+    background:rgba(10,10,12,0.82); backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  #switch .brand{font-weight:800; font-size:15px; letter-spacing:-0.02em; margin-right:auto;}
+  #switch .brand span{color:var(--orange);}
+  #switch .brand i{font-style:normal; font-size:9px; color:#4e4e52; display:block;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;
+    font-weight:500; margin-top:3px;}
+  #switch button{
+    background:transparent; border:1px solid var(--line); color:var(--ink-dim);
+    border-radius:4px; padding:9px 15px; cursor:pointer;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;
+    font-size:10px; font-weight:500; transition:all .25s;
+  }
+  #switch button:hover{border-color:rgba(255,122,26,.45); color:var(--ink);}
+  #switch button.on{background:var(--orange); border-color:var(--orange); color:#0a0a0c; font-weight:700;}
+
+  .stage{padding-top:64px;}
+  .concept{display:none;}
+  .concept.live{display:block;}
+
+  /* the "this replaces the sections under your hero" reminder strip */
+  .heronote{
+    border-bottom:1px solid var(--line); background:#08080a;
+    padding:26px 5vw; text-align:center;
+  }
+  .heronote .k{font-size:10px; color:#4e4e52; font-family:'JetBrains Mono',monospace;
+    letter-spacing:.12em; text-transform:uppercase;}
+  .heronote .t{font-size:13px; color:var(--ink-dim); font-weight:600; margin-top:10px;
+    max-width:62ch; margin-left:auto; margin-right:auto; line-height:1.7;}
+  .heronote .t b{color:var(--ink);}
+
+  /* ===== shared page furniture, mirroring #product ===== */
+  .psec{padding:104px 5vw; position:relative;}
+  .inner{max-width:1080px; margin:0 auto;}
+  .idx{font-size:11px; color:var(--ink-dim); margin-bottom:22px; text-align:center;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;}
+  .idx b{color:var(--orange); font-weight:500;}
+  h2{font-size:clamp(34px,5.4vw,72px); text-align:center; text-transform:uppercase; line-height:0.94;}
+  .dek{
+    text-align:center; color:var(--ink-dim); font-size:clamp(14px,1.6vw,16px);
+    line-height:1.68; max-width:60ch; margin:24px auto 0; font-weight:600;
+  }
+  .dek b{color:var(--ink);}
+  .eyebrow{
+    font-size:11px; color:var(--orange); margin-bottom:18px;
+    display:flex; align-items:center; gap:10px; justify-content:center;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;
+  }
+  .eyebrow::before,.eyebrow::after{content:''; width:24px; height:1px; background:#d65e00;}
+
+  .grid{display:grid; gap:18px; margin-top:48px;}
+  .g2{grid-template-columns:1fr 1fr;}
+  .g3{grid-template-columns:repeat(3,1fr);}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:26px; position:relative; box-shadow:0 24px 60px rgba(0,0,0,.45);
+  }
+  .card h3{font-size:16px; font-weight:700; letter-spacing:-.01em; margin-bottom:12px;}
+  .card p{color:var(--ink-dim); font-size:14px; line-height:1.62; font-weight:600;}
+  .cnum{position:absolute; top:20px; right:22px; font-size:10px; color:#3a3a3e;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em;}
+  .tags{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;}
+  .tag{background:rgba(255,122,26,.13); border:1px solid rgba(255,122,26,.3);
+    color:var(--orange); border-radius:20px; padding:5px 11px; font-size:10px; font-weight:700;}
+
+  /* ---- pricing tiers ---- */
+  .tier{background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:26px; position:relative;}
+  .tier.feat{border-color:rgba(255,122,26,.42); box-shadow:0 0 44px rgba(255,122,26,.11);}
+  .tier .nm{font-size:11px; color:var(--ink-dim);
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;}
+  .tier .setup{font-size:38px; font-weight:800; letter-spacing:-.045em; margin-top:12px; line-height:1;}
+  .tier .setup em{font-style:normal; color:var(--orange);}
+  .tier .setup s{color:#5a5a56; text-decoration-thickness:2px; font-size:.62em;
+    font-weight:700; margin-right:10px; text-decoration-color:var(--bad);}
+  .tier .mo{color:var(--orange); font-weight:800; font-size:15px; margin-top:8px;}
+  .tier .sub2{font-size:10px; color:#4e4e52; margin-top:6px;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;}
+  .tier ul{list-style:none; margin-top:20px; border-top:1px solid var(--line); padding-top:18px;}
+  .tier li{font-size:13px; color:var(--ink-dim); padding:7px 0 7px 23px;
+    position:relative; line-height:1.5; font-weight:600;}
+  .tier li::before{content:""; position:absolute; left:0; top:12px; width:10px; height:5px;
+    border-left:2px solid var(--orange); border-bottom:2px solid var(--orange); transform:rotate(-45deg);}
+  .flag{position:absolute; top:-9px; left:26px; background:var(--orange); color:#0a0a0c;
+    font-size:9px; font-weight:700; padding:4px 10px; border-radius:3px;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;}
+
+  /* ---- calculator ---- */
+  .calc{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:48px;}
+  .field{margin-bottom:24px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block; font-size:13px; font-weight:700; margin-bottom:8px;}
+  .field .v{font-size:28px; font-weight:800; color:var(--orange); letter-spacing:-.03em; line-height:1;}
+  .field input[type=range]{width:100%; accent-color:var(--orange); height:4px; margin-top:12px;}
+  .field .hint{font-size:11.5px; color:#5f5f5c; font-weight:600; margin-top:8px; line-height:1.55;}
+  .out{display:flex; flex-direction:column; justify-content:center;}
+  .out .lab{font-size:10px; color:var(--ink-dim); margin-bottom:10px;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;}
+  .out .money{font-size:clamp(38px,5.6vw,58px); font-weight:800;
+    letter-spacing:-.045em; line-height:1; color:var(--bad);}
+  .out .exp{color:var(--ink-dim); font-size:13px; line-height:1.62; margin-top:14px; font-weight:600;}
+  .payoff{border:1px solid rgba(90,209,154,.28); background:rgba(90,209,154,.07);
+    border-radius:12px; padding:15px; margin-top:20px; font-size:13px; line-height:1.6;
+    color:#a9dfc6; font-weight:600;}
+  .payoff b{color:var(--good); font-weight:800;}
+  .payoff.no{border-color:rgba(255,91,77,.30); background:rgba(255,91,77,.07); color:#e8b3ad;}
+  .payoff.no b{color:var(--bad);}
+  .assume{font-size:11px; color:#4e4e52; margin-top:14px; line-height:1.6; font-weight:600;}
+
+  /* ---- the "invisible" search visual (concept B) ---- */
+  .serp{border:1px solid var(--line); border-radius:14px; background:#08080a; overflow:hidden;}
+  .serp .bar{background:#111114; padding:11px 16px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:9px;}
+  .serp .bar i{width:9px; height:9px; border-radius:50%; background:#2e2e33; display:block;}
+  .serp .bar span{margin-left:10px; font-size:10px; color:var(--ink-dim);
+    font-family:'JetBrains Mono',monospace; letter-spacing:.1em;}
+  .serp .rows{padding:14px 16px 18px;}
+  .srow{padding:12px 0; border-bottom:1px solid rgba(232,230,225,.06);}
+  .srow:last-child{border-bottom:0;}
+  .srow .t{font-size:14px; font-weight:700; color:#9aaaff;}
+  .srow .u{font-size:10px; color:#5f5f5c; margin-top:3px; font-family:'JetBrains Mono',monospace;}
+  .srow .d{font-size:12px; color:var(--ink-dim); margin-top:6px; font-weight:600; line-height:1.5;}
+  .srow.you{background:rgba(255,91,77,.06); margin:0 -16px; padding:12px 16px;
+    border-left:2px solid var(--bad);}
+  .srow.you .t{color:var(--ink-dim); text-decoration:line-through; text-decoration-color:var(--bad);}
+  .srow.you .flagx{display:inline-block; margin-left:9px; font-size:9px; font-weight:700;
+    color:var(--bad); background:rgba(255,91,77,.14); border-radius:20px; padding:3px 9px;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.1em; text-transform:uppercase;
+    text-decoration:none; vertical-align:middle;}
+
+  /* ---- comparison table (concept C) ---- */
+  .vs{margin-top:48px; border:1px solid var(--line); border-radius:18px; overflow:hidden;
+    background:var(--card); box-shadow:0 24px 60px rgba(0,0,0,.45);}
+  .vsrow{display:grid; grid-template-columns:1.5fr 1fr 1fr; align-items:center;}
+  .vsrow > div{padding:16px 20px; border-bottom:1px solid rgba(232,230,225,.06); font-size:13px;
+    font-weight:600; color:var(--ink-dim);}
+  .vsrow:last-child > div{border-bottom:0;}
+  .vshead > div{background:#111114; border-bottom:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;
+    font-size:10px; font-weight:700; color:#5f5f5c;}
+  .vshead .me{color:var(--orange);}
+  .vsrow .lbl{color:var(--ink); font-weight:700;}
+  .vsrow .me{color:var(--ink); font-weight:700; background:rgba(255,122,26,.045);}
+  .vsrow .yes{color:var(--good); font-weight:800;}
+  .vsrow .no{color:#4e4e52;}
+  .vsprice > div{font-size:22px; font-weight:800; letter-spacing:-.04em; color:var(--ink);
+    background:#0b0b0e;}
+  .vsprice .me{color:var(--orange); background:rgba(255,122,26,.08);}
+  .vsprice .lbl{font-size:11px; font-weight:700; color:#5f5f5c;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;}
+  .srcnote{font-size:11px; color:#4e4e52; margin-top:16px; line-height:1.7; font-weight:600;
+    text-align:center;}
+  .srcnote a{color:#5f5f5c;}
+
+  /* ---- process steps ---- */
+  .steps{display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:48px;}
+  .step{border-top:1px solid var(--line); padding-top:20px;}
+  .step .n{font-size:10px; color:var(--orange); font-family:'JetBrains Mono',monospace;
+    letter-spacing:.12em; text-transform:uppercase; font-weight:700;}
+  .step h4{font-size:15px; font-weight:700; margin-top:12px; letter-spacing:-.01em;}
+  .step p{font-size:13px; color:var(--ink-dim); line-height:1.6; margin-top:9px; font-weight:600;}
+
+  /* ---- curved work gallery ----
+     Three browser frames laid along a shallow arc: the middle one lifted and
+     upright, the outer two rotated and dropped so their top edges trace a
+     curve. Hovering straightens whichever one you're looking at. */
+  /* wider than .inner (1080) so the screenshots get real room to be read */
+  .curvewrap{width:min(1340px,94vw); margin:0 auto;}
+  .curve{
+    margin-top:56px; display:flex; justify-content:center; align-items:flex-start;
+    gap:24px; perspective:1600px;
+  }
+  .frame{
+    flex:1 1 0; max-width:430px; border-radius:26px; overflow:hidden;
+    background:var(--card); border:1px solid var(--line);
+    box-shadow:0 34px 80px rgba(0,0,0,.55); cursor:zoom-in;
+    transition:transform .55s cubic-bezier(.2,.7,.3,1), box-shadow .55s, border-color .4s;
+    transform-origin:50% 100%;
+  }
+  /* shallow arc — enough to read as a curve, not enough to hurt legibility */
+  .frame:nth-child(1){transform:rotate(-4deg) translateY(22px) scale(.96);}
+  .frame:nth-child(2){transform:translateY(-12px) scale(1.03); z-index:2;}
+  .frame:nth-child(3){transform:rotate(4deg) translateY(22px) scale(.96);}
+  .curve:hover .frame{opacity:.5;}
+  .curve .frame:hover{
+    transform:translateY(-20px) scale(1.06) rotate(0deg); opacity:1; z-index:3;
+    border-color:rgba(255,122,26,.4);
+    box-shadow:0 44px 100px rgba(0,0,0,.65), 0 0 44px rgba(255,122,26,.10);
+  }
+
+  /* full-size viewer */
+  #lightbox{
+    position:fixed; inset:0; z-index:200; display:none;
+    background:rgba(6,6,8,.94); backdrop-filter:blur(6px);
+    align-items:center; justify-content:center; padding:28px; cursor:zoom-out;
+  }
+  #lightbox.on{display:flex;}
+  #lightbox img{
+    max-width:96vw; max-height:88vh; border-radius:14px;
+    border:1px solid var(--line); box-shadow:0 40px 120px rgba(0,0,0,.7);
+  }
+  #lightbox .close{
+    position:absolute; top:20px; right:26px; color:var(--ink-dim);
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.12em;
+    text-transform:uppercase; border:1px solid var(--line); border-radius:4px;
+    padding:9px 14px; background:transparent;
+  }
+  .frame .top{
+    background:#111114; padding:10px 14px; display:flex; align-items:center; gap:7px;
+    border-bottom:1px solid var(--line);
+  }
+  .frame .top i{width:8px; height:8px; border-radius:50%; background:#2e2e33; display:block;}
+  .frame .top span{
+    margin-left:8px; font-size:9px; color:#4e4e52; font-family:'JetBrains Mono',monospace;
+    letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .frame .shot{display:block; width:100%; height:300px; object-fit:cover; object-position:top center;}
+  .frame .cap{padding:16px 18px 18px; border-top:1px solid var(--line);}
+  .frame .cap b{display:block; font-size:14px; font-weight:700; letter-spacing:-.01em;}
+  .frame .cap em{
+    display:block; font-style:normal; font-size:11.5px; color:var(--ink-dim);
+    margin-top:6px; line-height:1.5; font-weight:600;
+  }
+  .curvenote{
+    text-align:center; font-size:11px; color:#4e4e52; margin-top:34px;
+    line-height:1.7; font-weight:600;
+  }
+  @media(max-width:900px){
+    .curve{flex-direction:column; align-items:center; gap:20px; perspective:none;}
+    .frame,
+    .frame:nth-child(1), .frame:nth-child(2), .frame:nth-child(3){
+      transform:none; max-width:100%; width:100%;
+    }
+    .curve:hover .frame{opacity:1;}
+    .curve .frame:hover{transform:none;}
+  }
+
+  /* ---- proof strip ---- */
+  .proof{display:flex; gap:44px; justify-content:center; flex-wrap:wrap; margin-top:44px;
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:30px 0;}
+  .proof div{text-align:center;}
+  .proof .n{font-size:34px; font-weight:800; letter-spacing:-.045em; line-height:1;}
+  .proof .k{font-size:9px; color:#5f5f5c; margin-top:8px;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;}
+
+  /* ---- close ---- */
+  .close{text-align:center; padding:120px 5vw 110px;}
+  .close h2{font-size:clamp(44px,7.4vw,104px); color:var(--ink);}
+  .close em{font-style:normal; color:var(--orange);}
+  .ctarow{display:flex; gap:14px; justify-content:center; align-items:center;
+    flex-wrap:wrap; margin-top:34px;}
+  .bigcta{display:inline-block; background:var(--orange); color:#0a0a0c;
+    text-decoration:none; border-radius:6px; padding:15px 26px; font-size:12px; font-weight:700;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;}
+  .altcta{color:var(--ink-dim); text-decoration:none; font-size:11px;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;
+    border-bottom:1px solid var(--line); padding-bottom:2px;}
+  .altcta:hover{color:var(--orange);}
+  .founding{display:inline-block; margin-top:18px; padding:7px 14px;
+    border:1px solid rgba(255,122,26,.42); background:rgba(255,122,26,.10);
+    color:var(--orange); border-radius:20px; font-size:11px; font-weight:700;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase;}
+
+  /* ---- faq ---- */
+  .faq{max-width:800px; margin:48px auto 0;}
+  details{border-bottom:1px solid var(--line); padding:19px 0;}
+  summary{cursor:pointer; font-weight:700; font-size:15px; list-style:none;
+    display:flex; justify-content:space-between; gap:20px; align-items:flex-start;}
+  summary::-webkit-details-marker{display:none;}
+  summary::after{content:"+"; color:var(--orange); font-size:20px; line-height:1;
+    flex-shrink:0; font-weight:700;}
+  details[open] summary::after{content:"–";}
+  details p{color:var(--ink-dim); font-size:14px; line-height:1.68; margin-top:12px; font-weight:600;}
+
+  @media(max-width:900px){
+    .psec{padding:70px 6vw;}
+    .g2,.g3,.calc,.steps{grid-template-columns:1fr;}
+    .vsrow{grid-template-columns:1fr;}
+    .vsrow > div{border-bottom:1px solid rgba(232,230,225,.06);}
+    .close{padding:86px 6vw 76px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="switch">
+  <div class="brand">PS<span>×</span>AI <i>Model concepts · sell websites</i></div>
+  <button class="on" data-c="a">01 — The Build</button>
+  <button data-c="b">02 — The Audit</button>
+  <button data-c="c">03 — The Comparison</button>
+</div>
+
+<div class="stage">
+
+<!-- ================================================================
+     CONCEPT A — THE BUILD
+     Seed's package structure, your voice. Straight product page.
+     ================================================================ -->
+<div class="concept live" id="c-a">
+  <div class="heronote">
+    <div class="k">Your hero cinematic stays exactly as it is</div>
+    <div class="t">Everything below replaces the <b>Never Miss a Job</b> sections under it.
+      Same particle <b>PS×AI</b> assembly, same BUILT TO RUN, same scroll — only the offer changes.</div>
+  </div>
+
+  <section class="psec">
+    <div class="inner">
+      <div class="idx"><b>01</b> / WEB DESIGN</div>
+      <h2><span class="chrome">I build the site. You own it.</span></h2>
+      <p class="dek">Custom websites for small businesses. Yours gets built from scratch for your
+        business instead of picked off a template list. It works on a phone, it loads fast, and it's
+        set up so people can find you in a search. When it's finished, <b>the code, the content and
+        the domain are yours</b>.</p>
+
+      <div class="proof">
+        <div><div class="n chrome">&lt;1s</div><div class="k">Typical load time</div></div>
+        <div><div class="n chrome">100%</div><div class="k">You own it</div></div>
+      </div>
+
+      <div class="grid g3">
+        <div class="card">
+          <div class="cnum">01</div>
+          <h3>No templates</h3>
+          <p>Your site gets written for your business. There's no page-builder subscription to keep
+            paying for, and no plugin stack that breaks when something updates.</p>
+          <div class="tags"><span class="tag">Custom design</span><span class="tag">Works on phones</span></div>
+        </div>
+        <div class="card">
+          <div class="cnum">02</div>
+          <h3>Set up to be found</h3>
+          <p>Search basics, your Google Business Profile and analytics all get handled during the
+            build. It's part of the job, not something I sell you later.</p>
+          <div class="tags"><span class="tag">Local SEO</span><span class="tag">Google tools</span></div>
+        </div>
+        <div class="card">
+          <div class="cnum">03</div>
+          <h3>It stays yours</h3>
+          <p>The code, the content and the domain go in your name. If you ever want to move it
+            somewhere else, I'll hand you the files and help you move it.</p>
+          <div class="tags"><span class="tag">Full ownership</span><span class="tag">No lock-in</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="psec" style="background:#08080a; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+    <div class="inner">
+      <div class="idx"><b>02</b> / PROCESS</div>
+      <h2><span class="chrome">How it works.</span></h2>
+      <p class="dek">A bigger shop has your project sitting in a queue behind everyone else's.
+        <b>I take one site at a time</b>, so most builds run about two weeks.</p>
+      <div class="steps">
+        <div class="step"><div class="n">Step 01</div><h4>We talk</h4>
+          <p>About 30 minutes on the phone. What you sell, who buys it, and what you want the site to do.</p></div>
+        <div class="step"><div class="n">Step 02</div><h4>I build it</h4>
+          <p>You get a link to a working version you can click through, usually inside the first week.</p></div>
+        <div class="step"><div class="n">Step 03</div><h4>We fix what's off</h4>
+          <p>Speed, phones, forms, wording, search setup. I test it on real phones before it goes up.</p></div>
+        <div class="step"><div class="n">Step 04</div><h4>It goes live</h4>
+          <p>I handle the domain, the certificate and the launch, then show you how to update it yourself.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="psec">
+    <div class="inner">
+      <div class="idx"><b>03</b> / WORK</div>
+      <h2><span class="chrome">A few things I've built.</span></h2>
+      <p class="dek">An online store that takes recurring payments, a web app with
+        accounts and a database, and a site for a local shop. <b>Names and details are
+        removed</b> — this is here to show how the work looks, not who it was for.</p>
+    </div>
+
+    <div class="curvewrap">
+      <div class="curve">
+        <div class="frame">
+          <div class="top"><i></i><i></i><i></i><span>Online store</span></div>
+          <img class="shot" src="/static/shots/work-store.png" alt="An online store page with a subscription plan and pricing">
+          <div class="cap"><b>Online store</b>
+            <em>Product pages, subscription and one-off checkout, real card payments.</em></div>
+        </div>
+        <div class="frame">
+          <div class="top"><i></i><i></i><i></i><span>Web app</span></div>
+          <img class="shot" src="/static/shots/work-app.png" alt="A web application landing page with sign-in and account options">
+          <div class="cap"><b>Web app</b>
+            <em>User accounts, sign-in, and a database behind it — not a brochure site.</em></div>
+        </div>
+        <div class="frame">
+          <div class="top"><i></i><i></i><i></i><span>Local business</span></div>
+          <img class="shot" src="/static/shots/work-local.png" alt="A local business homepage with a tap-to-call button">
+          <div class="cap"><b>Local business</b>
+            <em>The kind of site most of this page is about: fast, mobile, easy to call.</em></div>
+        </div>
+      </div>
+
+      <p class="curvenote">Click any one of them to see it full size.</p>
+    </div>
+  </section>
+
+  <section class="psec">
+    <div class="inner">
+      <div class="idx"><b>04</b> / PACKAGES</div>
+      <h2><span class="chrome">What it costs.</span></h2>
+      <p class="dek">One-time build fee. Optional care plan after launch.
+        <b>No contract, cancel any time</b> — the site stays yours either way.</p>
+
+      <div class="grid g3">
+        <div class="tier">
+          <div class="nm">Launch</div>
+          <div class="setup">$2–3k</div>
+          <div class="sub2">Up to 5 pages</div>
+          <ul>
+            <li>Custom mobile-first design</li>
+            <li>Basic on-page SEO</li>
+            <li>Google Analytics + Search Console</li>
+            <li>Contact form + SSL</li>
+            <li>Staging site before launch</li>
+            <li>2 hours of post-launch changes</li>
+          </ul>
+        </div>
+        <div class="tier feat">
+          <div class="flag">Recommended</div>
+          <div class="nm">Standard</div>
+          <div class="setup">$4–6k</div>
+          <div class="sub2">Up to 10 pages</div>
+          <ul>
+            <li>Everything in Launch</li>
+            <li>Full local SEO + schema markup</li>
+            <li>Google Business Profile setup</li>
+            <li>You can edit the pages yourself</li>
+            <li>I write the wording with you</li>
+            <li>6 hours of post-launch changes</li>
+            <li>I show you how to use it</li>
+          </ul>
+        </div>
+        <div class="tier">
+          <div class="nm">Advanced</div>
+          <div class="setup"><em>From</em> $8k</div>
+          <div class="sub2">20+ pages / e-commerce</div>
+          <ul>
+            <li>Everything in Standard</li>
+            <li>Online store or booking system</li>
+            <li>Multi-location / service-area pages</li>
+            <li>Custom integrations + automation</li>
+            <li>12 hours of post-launch changes</li>
+            <li>You go first when you need changes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-top:18px;">
+        <div class="card">
+          <div class="cnum">CARE</div>
+          <h3>Care plan — from ~$100/mo</h3>
+          <p>Hosting, SSL, daily off-site backups, security updates, uptime monitoring, and up to
+            30 minutes of content changes a month. Optional, cancel any time.</p>
+        </div>
+        <div class="card">
+          <div class="cnum">HOURLY</div>
+          <h3>Already have a site — hourly</h3>
+          <p>Fixes, redesigns of single pages, speed work, or migrating you off a platform that's
+            charging you rent. Billed in 15-minute increments, quoted before I start.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close">
+    <div class="idx"><b>05</b> / START</div>
+    <h2>Get a <em>quote</em>.</h2>
+    <p class="dek">It's free and it takes about ten minutes. I'll look at what you have now and
+      tell you whether it needs replacing or just fixing — sometimes it's just fixing.</p>
+    <div class="ctarow">
+      <a class="bigcta" href="tel:+19183730512">+ Call (918) 373-0512</a>
+      <a class="altcta" href="mailto:prestondarnell46@gmail.com?subject=Website%20quote">Or email me</a>
+    </div>
+  </section>
+</div>
+
+
+<!-- ================================================================
+     CONCEPT B — THE AUDIT
+     Keeps the interactive "here is what it's costing you" demo you liked,
+     retargeted from missed calls to an outdated/invisible website.
+     ================================================================ -->
+<div class="concept" id="c-b">
+  <div class="heronote">
+    <div class="k">Your hero cinematic stays exactly as it is</div>
+    <div class="t">Same structure as concept 01 — but the <b>interactive loss demo leads</b>,
+      the way the Never Miss a Job calculator does now. The prospect sees the number before
+      they see a price.</div>
+  </div>
+
+  <section class="psec">
+    <div class="inner">
+      <div class="eyebrow">Worth checking</div>
+      <h2><span class="chrome">What your website is costing you.</span></h2>
+      <p class="dek">People look you up on their phone, the site is hard to use, and they call
+        someone else instead. You never hear about it, so it's easy to miss.
+        <b>Put your own numbers in and see what it adds up to.</b></p>
+
+      <div class="calc">
+        <div class="card">
+          <div class="field">
+            <label>People who look you up each month</label>
+            <div class="v" id="b-lookups">250</div>
+            <input type="range" id="b-lookups-i" min="50" max="2000" step="25" value="250">
+            <div class="hint">Google searches, Facebook taps, someone typing your name after a
+              yard sign. If you don't know, 250 is typical for an established local trade.</div>
+          </div>
+          <div class="field">
+            <label>How many leave without contacting you</label>
+            <div class="v" id="b-bounce">55%</div>
+            <input type="range" id="b-bounce-i" min="20" max="90" step="1" value="55">
+            <div class="hint">Slow load, no mobile layout, no prices, no photos, phone number
+              they can't tap. The average small-business site loses more than half.</div>
+          </div>
+          <div class="field">
+            <label>Of those, how many actually wanted work done</label>
+            <div class="v" id="b-real">12%</div>
+            <input type="range" id="b-real-i" min="3" max="50" step="1" value="12">
+            <div class="hint">Be honest here — this is the number that keeps the answer real.
+              Most of the people who bounce were never buyers: suppliers, competitors checking
+              your prices, and people who typed the wrong thing.</div>
+          </div>
+          <div class="field">
+            <label>Average job value</label>
+            <div class="v" id="b-job">$850</div>
+            <input type="range" id="b-job-i" min="100" max="15000" step="50" value="850">
+            <div class="hint">What one closed customer is worth to you, first job only.</div>
+          </div>
+        </div>
+
+        <div class="card out">
+          <div class="lab">Walking out the door every year</div>
+          <div class="money" id="b-money">$42,000</div>
+          <div class="exp" id="b-exp">People who wanted to hire you
+            and left instead.</div>
+          <div class="payoff" id="b-payoff"></div>
+          <div class="assume">Rough math, deliberately conservative — it assumes you close
+            <b>only 1 in 4</b> of the people you'd recover. It is an argument for looking at your
+            own numbers, not a promise.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="psec" style="background:#08080a; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+    <div class="inner">
+      <div class="idx"><b>02</b> / THE PROBLEM</div>
+      <h2><span class="chrome">This is what they see.</span></h2>
+      <p class="dek">This is what someone in your town sees when they search for what you do.
+        <b>Notice who isn't there.</b></p>
+
+      <div class="grid" style="grid-template-columns:1fr; margin-top:40px;">
+        <div class="serp">
+          <div class="bar"><i></i><i></i><i></i><span>google.com — "roof repair near me"</span></div>
+          <div class="rows">
+            <div class="srow">
+              <div class="t">Tulsa Roofing Co — Free Inspections, Same Week</div>
+              <div class="u">tulsaroofingco.com › roof-repair</div>
+              <div class="d">★★★★★ 4.9 (214) · Open now · Storm damage, shingle repair, insurance claims.</div>
+            </div>
+            <div class="srow">
+              <div class="t">Green Country Exteriors | Roof Repair &amp; Replacement</div>
+              <div class="u">greencountryexteriors.com</div>
+              <div class="d">★★★★★ 4.8 (96) · Open now · Free estimate in 24 hours.</div>
+            </div>
+            <div class="srow you">
+              <div class="t">Your Business<span class="flagx">Page 4 · no mobile site</span></div>
+              <div class="u">facebook.com/profile.php?id=61…</div>
+              <div class="d">A Facebook page last updated in 2019, a phone number nobody can tap,
+                and no photos of the work you actually do.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid g3">
+        <div class="card"><div class="cnum">01</div>
+          <h3>They don't find you</h3>
+          <p>Without a real site you mostly get the people who already knew your name. That's a
+            much smaller group than the people looking for what you do.</p></div>
+        <div class="card"><div class="cnum">02</div>
+          <h3>It looks closed</h3>
+          <p>An old site makes people wonder if you're still in business. They don't ask —
+            they just go back and pick someone else.</p></div>
+        <div class="card"><div class="cnum">03</div>
+          <h3>They can't get hold of you</h3>
+          <p>No number they can tap, no form, no hours, no list of what towns you cover.
+            Every extra step loses a few more of them.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="psec">
+    <div class="inner">
+      <div class="idx"><b>03</b> / THE FIX</div>
+      <h2><span class="chrome">What it costs to fix.</span></h2>
+      <p class="dek">One-time fee, you own everything, optional <b>~$100/mo</b> care plan
+        to keep it hosted, backed up and updated.</p>
+
+      <div class="grid g3">
+        <div class="tier">
+          <div class="nm">Launch</div><div class="setup">$2–3k</div>
+          <div class="sub2">Up to 5 pages</div>
+          <ul><li>Custom mobile-first design</li><li>Basic on-page SEO</li>
+            <li>Analytics + Search Console</li><li>Tap-to-call + contact form</li>
+            <li>2 hours of post-launch changes</li></ul>
+        </div>
+        <div class="tier feat">
+          <div class="flag">Recommended</div>
+          <div class="nm">Standard</div><div class="setup">$4–6k</div>
+          <div class="sub2">Up to 10 pages</div>
+          <ul><li>Everything in Launch</li><li>Full local SEO + schema</li>
+            <li>Google Business Profile setup</li><li>Edit-it-yourself CMS + training</li>
+            <li>I write the wording with you</li><li>6 hours of post-launch changes</li></ul>
+        </div>
+        <div class="tier">
+          <div class="nm">Advanced</div><div class="setup"><em>From</em> $8k</div>
+          <div class="sub2">20+ pages / e-commerce</div>
+          <ul><li>Everything in Standard</li><li>Store or online booking</li>
+            <li>Service-area page network</li><li>Custom integrations</li>
+            <li>12 hours of post-launch changes</li></ul>
+        </div>
+      </div>
+
+      <div class="faq">
+        <details open><summary>What if my numbers up there don't justify it?</summary>
+          <p>Then don't buy it. If the calculator says you'd recover less than the build costs,
+            I'll tell you the same thing on the phone — fix your Google Business Profile first,
+            it's free, and call me next year.</p></details>
+        <details><summary>How long does it take?</summary>
+          <p>Two weeks for most builds. You'll see a working staging site inside the first week,
+            not a picture of one.</p></details>
+        <details><summary>Do I own it?</summary>
+          <p>Completely. Design, content, domain, and the code. If you ever want to move it
+            somewhere else, I'll hand you the files and help you do it.</p></details>
+        <details><summary>What happens if I skip the care plan?</summary>
+          <p>The site keeps working. You just host it yourself and call me hourly when you want
+            changes. Plenty of clients do exactly that.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="close">
+    <h2>Find out what <em>yours is doing</em>.</h2>
+    <div class="ctarow">
+      <a class="bigcta" href="tel:+19183730512">+ Call (918) 373-0512</a>
+      <a class="altcta" href="mailto:prestondarnell46@gmail.com?subject=Free%20website%20audit">Free 10-minute audit</a>
+    </div>
+  </section>
+</div>
+
+
+<!-- ================================================================
+     CONCEPT C — THE COMPARISON
+     Price-anchoring play built directly on the Seed Technologies research.
+     ================================================================ -->
+<div class="concept" id="c-c">
+  <div class="heronote">
+    <div class="k">Your hero cinematic stays exactly as it is</div>
+    <div class="t">This one <b>anchors against the Tulsa agencies</b> instead of against
+      cheap freelancers. It only works if your build quality genuinely matches theirs — which is
+      the argument for taking the internship first.</div>
+  </div>
+
+  <section class="psec">
+    <div class="inner">
+      <div class="eyebrow">What agencies charge</div>
+      <h2><span class="chrome">The same work, without the overhead.</span></h2>
+      <p class="dek">A good agency will build you a ten-page website for around <b>$5.5k</b>.
+        I'll build you the same thing for about <b>$4.5k</b>. They do solid work — they just have
+        a staff and an office to cover, and I don't. You also deal with the person writing the
+        code instead of a project manager.</p>
+
+      <div class="vs">
+        <div class="vsrow vshead">
+          <div>What you're buying</div><div>Typical agency</div><div class="me">Preston Scott</div>
+        </div>
+        <div class="vsrow"><div class="lbl">Custom design, no template</div><div class="yes">Yes</div><div class="me yes">Yes</div></div>
+        <div class="vsrow"><div class="lbl">Mobile-first build</div><div class="yes">Yes</div><div class="me yes">Yes</div></div>
+        <div class="vsrow"><div class="lbl">Local SEO + Google Business Profile</div><div class="yes">Yes</div><div class="me yes">Yes</div></div>
+        <div class="vsrow"><div class="lbl">CMS + training</div><div class="yes">Yes</div><div class="me yes">Yes</div></div>
+        <div class="vsrow"><div class="lbl">You own design, content &amp; domain</div><div class="yes">Yes</div><div class="me yes">Yes</div></div>
+        <div class="vsrow"><div class="lbl">Typical turnaround</div><div>6–12 weeks</div><div class="me">2 weeks</div></div>
+        <div class="vsrow"><div class="lbl">Who answers when you call</div><div class="no">A project manager</div><div class="me">The person who built it</div></div>
+        <div class="vsrow"><div class="lbl">Monthly hosting</div><div>~$20–50/mo</div><div class="me">~$100/mo <span style="color:#5f5f5c;font-weight:600;">incl. updates</span></div></div>
+        <div class="vsrow vsprice">
+          <div class="lbl">10-page business site</div><div>~$5.5k</div><div class="me">~$4.5k</div>
+        </div>
+      </div>
+      <div class="srcnote">Agency figures are the published 2026 package prices of an established
+        20-year Tulsa web design firm — roughly $3.5k / $5.5k / $9.5k+ across their three tiers, hosting
+        from about $20/mo. Shown for comparison — they do good work, they just have overhead I don't.</div>
+    </div>
+  </section>
+
+  <section class="psec" style="background:#08080a; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+    <div class="inner">
+      <div class="idx"><b>02</b> / WHY THE PRICE IS WHAT IT IS</div>
+      <h2><span class="chrome">Why cheap ends up costing more.</span></h2>
+      <p class="dek">Most people price out a few options before they call anyone.
+        <b>The cheap ones cost less up front and more afterwards</b> — here's where the money
+        actually goes.</p>
+      <div class="grid g3">
+        <div class="card"><div class="cnum">CHEAP</div>
+          <h3>A template</h3>
+          <p>A few hundred dollars for a theme other businesses bought too, plus a builder
+            subscription you keep paying every month. It works, but it doesn't help you show up
+            in a search and it looks like everyone else.</p>
+          <div class="tags"><span class="tag" style="background:rgba(255,91,77,.13);border-color:rgba(255,91,77,.3);color:#ff5b4d;">Costs you jobs</span></div></div>
+        <div class="card"><div class="cnum">FREE</div>
+          <h3>A favor from someone you know</h3>
+          <p>Costs nothing until they get busy with their own life. Then nobody has the login,
+            small changes wait weeks, and there's usually no backup of any of it.</p>
+          <div class="tags"><span class="tag" style="background:rgba(255,91,77,.13);border-color:rgba(255,91,77,.3);color:#ff5b4d;">Costs you time</span></div></div>
+        <div class="card"><div class="cnum">$4–6k</div>
+          <h3>Built properly</h3>
+          <p>Costs more once, then it's done. No subscription, no waiting on a favor, and someone
+            picks up the phone when you need it changed. It pays for itself in
+            <b style="color:var(--ink)">a handful of average jobs</b>.</p>
+          <div class="tags"><span class="tag">Pays for itself</span></div></div>
+      </div>
+
+      <div class="calc" style="margin-top:44px;">
+        <div class="card">
+          <div class="field">
+            <label>Your average job value</label>
+            <div class="v" id="c-job">$850</div>
+            <input type="range" id="c-job-i" min="100" max="15000" step="50" value="850">
+            <div class="hint">One closed customer, first job only.</div>
+          </div>
+          <div class="field">
+            <label>Which build are you pricing?</label>
+            <div class="v" id="c-tierlbl">Standard — $4–6k</div>
+            <input type="range" id="c-tier-i" min="0" max="2" step="1" value="1">
+            <div class="hint">Slide between Launch, Standard and Advanced.</div>
+          </div>
+        </div>
+        <div class="card out">
+          <div class="lab">What it takes to break even</div>
+          <div class="money" id="c-money" style="color:var(--good);">6 jobs</div>
+          <div class="exp" id="c-exp">Six new customers over the life of the site and the build
+            has paid for itself. Everything after that is profit you weren't getting.</div>
+          <div class="payoff"><b>Compare:</b> the agency version of the same build is
+            <span id="c-agency">$5,600</span> — <span id="c-diff">$800</span> more,
+            or <span id="c-diffjobs">about one extra job</span>.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="psec">
+    <div class="inner">
+      <div class="idx"><b>03</b> / PACKAGES</div>
+      <h2><span class="chrome">What it costs.</span></h2>
+      <p class="dek">One-time build fee, no contract, no retainer required.
+        <b>Care plan is optional and cancellable</b> — the site is yours regardless.</p>
+      <div class="grid g3">
+        <div class="tier">
+          <div class="nm">Launch</div>
+          <div class="setup"><s>~$3.5k</s>$2–3k</div>
+          <div class="sub2">Up to 5 pages · vs. local agency</div>
+          <ul><li>Custom mobile-first design</li><li>Basic on-page SEO</li>
+            <li>Analytics + Search Console</li><li>Tap-to-call + contact form</li>
+            <li>2 hours of post-launch changes</li></ul>
+        </div>
+        <div class="tier feat">
+          <div class="flag">Best value</div>
+          <div class="nm">Standard</div>
+          <div class="setup"><s>~$5.5k</s>$4–6k</div>
+          <div class="sub2">Up to 10 pages · vs. local agency</div>
+          <ul><li>Everything in Launch</li><li>Full local SEO + schema</li>
+            <li>Google Business Profile setup</li><li>Edit-it-yourself CMS + training</li>
+            <li>I write the wording with you</li><li>6 hours of post-launch changes</li></ul>
+        </div>
+        <div class="tier">
+          <div class="nm">Advanced</div>
+          <div class="setup"><s>~$9.5k</s>$8k+</div>
+          <div class="sub2">20+ pages · vs. local agency</div>
+          <ul><li>Everything in Standard</li><li>Store or online booking</li>
+            <li>Service-area page network</li><li>Custom integrations</li>
+            <li>12 hours of post-launch changes</li></ul>
+        </div>
+      </div>
+      <div class="founding" style="display:block;text-align:center;max-width:max-content;margin:32px auto 0;">
+        First 5 clients this quarter — care plan free for a year
+      </div>
+    </div>
+  </section>
+
+  <section class="close">
+    <h2>Get a <em>quote</em>.</h2>
+    <p class="dek">Free quote, and I'll tell you honestly if the cheaper tier is the right one
+      for you. I'd rather build the small site you actually need than sell you the big one you don't.</p>
+    <div class="ctarow">
+      <a class="bigcta" href="tel:+19183730512">+ Call (918) 373-0512</a>
+      <a class="altcta" href="mailto:prestondarnell46@gmail.com?subject=Website%20quote">Get a free quote</a>
+    </div>
+  </section>
+</div>
+
+</div><!-- /stage -->
+
+<div id="lightbox"><button class="close">Close · Esc</button><img alt=""></div>
+
+<script>
+/* ---------- concept switcher ---------- */
+document.querySelectorAll('#switch button').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('#switch button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on');
+    document.querySelectorAll('.concept').forEach(function(c){c.classList.remove('live');});
+    document.getElementById('c-'+b.dataset.c).classList.add('live');
+    window.scrollTo(0,0);
+  });
+});
+
+var usd = function(n){ return '$' + Math.round(n).toLocaleString('en-US'); };
+
+/* ---------- work gallery: click a frame to read it full size ---------- */
+(function(){
+  var box = document.getElementById('lightbox');
+  if(!box) return;
+  var img = box.querySelector('img');
+
+  document.querySelectorAll('.frame').forEach(function(f){
+    f.addEventListener('click', function(){
+      var shot = f.querySelector('.shot');
+      if(!shot) return;
+      img.src = shot.getAttribute('src');
+      img.alt = shot.getAttribute('alt') || '';
+      box.classList.add('on');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  function close(){
+    box.classList.remove('on');
+    document.body.style.overflow = '';
+    img.removeAttribute('src');   /* don't hold the full-size decode */
+  }
+  box.addEventListener('click', close);
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && box.classList.contains('on')) close();
+  });
+})();
+
+/* ---------- concept B: the loss calculator ---------- */
+(function(){
+  var L = document.getElementById('b-lookups-i'),
+      B = document.getElementById('b-bounce-i'),
+      R = document.getElementById('b-real-i'),
+      J = document.getElementById('b-job-i');
+  if(!L) return;
+
+  var CLOSE_RATE = 0.25;      /* we only ever claim to recover 1 in 4 */
+  var BUILD      = 5000;      /* Standard-tier midpoint — math only */
+  var BUILD_LBL  = 'a $4–6k'; /* what the prospect actually sees */
+
+  function run(){
+    var lookups = +L.value, bounce = +B.value/100, real = +R.value/100, job = +J.value;
+
+    document.getElementById('b-lookups').textContent = lookups.toLocaleString('en-US');
+    document.getElementById('b-bounce').textContent  = B.value + '%';
+    document.getElementById('b-real').textContent    = R.value + '%';
+    document.getElementById('b-job').textContent     = usd(job);
+
+    var lostBuyersYr = lookups * bounce * real * 12;
+    var recovered    = lostBuyersYr * CLOSE_RATE;
+    var money        = recovered * job;
+
+    /* round to the nearest $1k — a figure like "$42,075" reads made-up */
+    document.getElementById('b-money').textContent = usd(Math.round(money/1000)*1000);
+    document.getElementById('b-exp').innerHTML =
+      'About <b>' + Math.round(lostBuyersYr).toLocaleString('en-US') + ' people a year</b> ' +
+      'land on you, want the work done, and leave without getting in touch. ' +
+      'Recovering just a quarter of them is ' + usd(Math.round(money/1000)*1000) + ' a year.';
+
+    var pay = document.getElementById('b-payoff');
+    if(money > BUILD * 1.5){
+      /* ceil, floored at 2 — "pays for itself in 1 month" is not a claim anyone believes */
+      var months = Math.max(2, Math.ceil(BUILD / (money/12)));
+      pay.className = 'payoff';
+      pay.innerHTML = BUILD_LBL.replace('a ','A <b>') + '</b> build pays for itself in about <b>' +
+        months + (months === 1 ? ' month' : ' months') + '</b> — roughly <b>' +
+        Math.max(1, Math.ceil(BUILD/job)) + ' jobs</b>. After that it\'s yours, working for free.';
+    } else {
+      pay.className = 'payoff no';
+      pay.innerHTML = '<b>Honestly? Don\'t buy yet.</b> At these numbers ' + BUILD_LBL +
+        ' build takes too long to pay back. Claim your Google Business Profile first — ' +
+        'it\'s free — and call me when the volume is there.';
+    }
+  }
+  [L,B,R,J].forEach(function(el){ el.addEventListener('input', run); });
+  run();
+})();
+
+/* ---------- concept C: break-even + agency delta ---------- */
+(function(){
+  var J = document.getElementById('c-job-i'), T = document.getElementById('c-tier-i');
+  if(!J) return;
+
+  /* `mine` / `agency` are midpoints used only for the math — every figure shown
+     to the prospect is the rounded band in `lbl` / `albl`. */
+  var TIERS = [
+    {nm:'Launch',   mine:2500, agency:3500, lbl:'$2–3k', albl:'~$3.5k'},
+    {nm:'Standard', mine:5000, agency:5500, lbl:'$4–6k', albl:'~$5.5k'},
+    {nm:'Advanced', mine:8500, agency:9500, lbl:'$8k+',  albl:'~$9.5k'}
+  ];
+
+  function run(){
+    var job = +J.value, t = TIERS[+T.value];
+
+    document.getElementById('c-job').textContent = usd(job);
+    document.getElementById('c-tierlbl').textContent = t.nm + ' — ' + t.lbl;
+
+    var jobs = Math.max(1, Math.ceil(t.mine / job));
+    document.getElementById('c-money').textContent = jobs + (jobs === 1 ? ' job' : ' jobs');
+    document.getElementById('c-exp').innerHTML =
+      '<b>' + jobs + '</b> new ' + (jobs === 1 ? 'customer' : 'customers') +
+      ' over the life of the site and the build has paid for itself. ' +
+      'Everything after that is profit you weren\'t getting.';
+
+    var diff = t.agency - t.mine, dj = diff / job;
+    document.getElementById('c-agency').textContent = t.albl;
+    document.getElementById('c-diff').textContent   = 'around ' + usd(diff);
+    document.getElementById('c-diffjobs').textContent =
+      dj < 1.5 ? 'about one extra job' : 'about ' + Math.round(dj) + ' extra jobs';
+  }
+  [J,T].forEach(function(el){ el.addEventListener('input', run); });
+  run();
+})();
+</script>
+</body>
+</html>
