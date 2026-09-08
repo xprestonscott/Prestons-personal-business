@@ -11,6 +11,248 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
+/* ===== hero cinematic — lifted verbatim from templates/index.html ===== */
+
+  :root{
+    --bg:#0a0a0c;
+    --ink:#e8e6e1;
+    --ink-dim:#8a8a86;
+    --orange:#ff7a1a;
+    --line:rgba(232,230,225,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Inter',-apple-system,'Segoe UI',sans-serif;
+    overflow-x:hidden;
+  }
+  .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace; letter-spacing:0.12em; text-transform:uppercase;}
+
+  /* 3D particle canvas behind everything */
+  /* Higgsfield film layer under everything */
+  .filmstack{position:fixed; inset:0; z-index:0; background:#0a0a0c;}
+  .filmstack .slot{
+    position:absolute; inset:0; opacity:0; transition:opacity 1.1s ease;
+    background-position:center; background-size:cover; background-repeat:no-repeat;
+  }
+  .filmstack .slot video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .filmstack .slot.on{opacity:var(--fo,0.55);}
+  .filmscrim{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:radial-gradient(circle at 50% 45%, rgba(10,10,12,0.15), rgba(10,10,12,0.72) 95%);
+  }
+  #cv{position:fixed; inset:0; width:100vw; height:100vh; z-index:2; pointer-events:none;}
+
+  /* smooth-scroll world: fixed wrapper translated by lerped scroll */
+  #spacer{width:1px;}
+  #world{position:fixed; top:0; left:0; right:0; z-index:5; will-change:transform;}
+  .sec{
+    height:100vh; position:relative;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+  }
+
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:30;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 36px;
+    background:rgba(10,10,12,0.35); backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{font-weight:800; font-size:18px; letter-spacing:-0.02em;}
+  .logo span{color:var(--orange);}
+  .nav-tag{font-size:10px; color:var(--ink-dim); border:1px solid var(--line); border-radius:20px; padding:3px 10px;}
+  .nav-cta{
+    background:var(--orange); color:#0a0a0c;
+    font-size:11px; font-weight:700; text-decoration:none;
+    padding:10px 18px; border-radius:4px;
+    transition:background .2s, transform .2s;
+  }
+  .nav-cta:hover{background:#ff8d3c; transform:translateY(-1px);}
+  .gcard .quote{
+    margin-top:16px; font-size:11px; font-weight:700; letter-spacing:0.05em;
+    color:var(--orange); text-decoration:none; display:inline-block;
+    font-family:'JetBrains Mono',ui-monospace,Consolas,monospace; text-transform:uppercase;
+  }
+  .gcard .quote:hover{text-decoration:underline;}
+  html,body{overflow-x:hidden; max-width:100vw;}
+  .nav-cta{white-space:nowrap;}
+  #rail{
+    position:fixed; right:26px; top:50%; transform:translateY(-50%);
+    z-index:30; display:flex; flex-direction:column; gap:18px;
+    font-size:10px; color:var(--ink-dim);
+  }
+  #rail div{transition:color .4s; display:flex; align-items:center; gap:8px; cursor:pointer;}
+  #rail div::before{content:''; width:14px; height:1px; background:var(--ink-dim); transition:all .4s;}
+  #rail div.on{color:var(--orange);}
+  #rail div.on::before{background:var(--orange); width:26px;}
+
+  .eyebrow{
+    font-size:11px; color:var(--orange); margin-bottom:18px;
+    display:flex; align-items:center; gap:10px; justify-content:center;
+  }
+  .eyebrow::before,.eyebrow::after{content:''; width:24px; height:1px; background:#d65e00;}
+  .idx{font-size:11px; color:var(--ink-dim); margin-bottom:12px;}
+  .idx b{color:var(--orange); font-weight:500;}
+
+  h1,h2{font-weight:800; letter-spacing:-0.045em; line-height:0.96; text-shadow:0 2px 30px rgba(10,10,12,0.85);}
+  h2{font-size:clamp(34px,5.4vw,72px);}
+  .sub{margin-top:16px; max-width:520px; font-size:14px; line-height:1.7; color:var(--ink-dim);}
+
+  .chrome{
+    background:linear-gradient(110deg,
+      #55555c 0%, #9a9aa2 18%, #ffffff 32%, #b9bac2 44%,
+      #55555c 60%, #9a9aa2 78%, #eceef2 92%, #55555c 100%);
+    background-size:250% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:sheen 6s linear infinite;
+  }
+  @keyframes sheen{from{background-position:0% 0;}to{background-position:250% 0;}}
+
+  /* ===== chrome 3D hero logo (particles condense into this) ===== */
+  #heroLogoWrap{
+    perspective:900px; margin:6px 0 10px;
+    height:clamp(90px,14vw,170px); display:flex; align-items:center; justify-content:center;
+  }
+  #heroLogo{
+    font-weight:800; font-size:clamp(76px,12vw,150px); letter-spacing:-0.04em;
+    transform-style:preserve-3d;
+    animation:logoTurn 7s ease-in-out infinite;
+    opacity:0; filter:blur(10px); transition:opacity 1.6s ease, filter 1.6s ease;
+  }
+  #heroLogo.solid{opacity:1; filter:blur(0);}
+  @keyframes logoTurn{
+    0%,100%{transform:rotateY(-13deg) rotateX(4deg);}
+    50%{transform:rotateY(13deg) rotateX(-4deg);}
+  }
+  #heroReflect{
+    transform:scaleY(-1) translateY(-6px);
+    -webkit-mask-image:linear-gradient(to bottom, transparent 55%, rgba(0,0,0,0.35) 100%);
+    mask-image:linear-gradient(to bottom, transparent 55%, rgba(0,0,0,0.35) 100%);
+    opacity:0; transition:opacity 1.6s ease .3s;
+    font-weight:800; font-size:clamp(76px,12vw,150px); letter-spacing:-0.04em;
+    margin-top:-14px; pointer-events:none;
+  }
+  #heroReflect.solid{opacity:.45;}
+
+  /* ===== glass cards in 3D space ===== */
+  .stage3d{perspective:1200px; margin-top:34px;}
+  .tilt{
+    transform-style:preserve-3d;
+    display:flex; gap:26px; align-items:stretch; justify-content:center;
+    will-change:transform;
+  }
+  .gcard{
+    position:relative;
+    background:linear-gradient(145deg, rgba(232,230,225,0.075), rgba(232,230,225,0.02));
+    border:1px solid rgba(232,230,225,0.15);
+    border-radius:18px;
+    backdrop-filter:blur(16px);
+    box-shadow:0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.09);
+    padding:22px 24px; text-align:left;
+    width:min(320px, 84vw);
+    transform:translateZ(-560px) translateY(70px) rotateX(14deg);
+    opacity:0; filter:blur(8px);
+    transition:transform 1s cubic-bezier(.16,1,.3,1), opacity 1s ease, filter 1s ease;
+  }
+  .sec.live .gcard{transform:translateZ(var(--z,0px)) translateY(0) rotateX(0); opacity:1; filter:blur(0);}
+  .sec.live .gcard:nth-child(1){transition-delay:.05s;}
+  .sec.live .gcard:nth-child(2){transition-delay:.17s;}
+  .sec.live .gcard:nth-child(3){transition-delay:.29s;}
+  .gcard h4{font-size:14px; margin-bottom:12px; letter-spacing:0.02em;}
+  .gcard .mono{font-size:9px; color:var(--ink-dim);}
+
+  .chip{
+    display:inline-block; font-size:10px; font-weight:700;
+    background:rgba(255,122,26,0.15); color:var(--orange);
+    border:1px solid rgba(255,122,26,0.35);
+    padding:3px 9px; border-radius:20px;
+  }
+
+  /* mini browser mock inside a card */
+  .miniweb{border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-top:6px;}
+  .miniweb .bar{display:flex; gap:5px; padding:7px 9px; border-bottom:1px solid var(--line); background:rgba(232,230,225,0.04);}
+  .miniweb .bar i{width:7px; height:7px; border-radius:50%; background:var(--orange); opacity:.85;}
+  .miniweb .bar i:nth-child(2){opacity:.5;} .miniweb .bar i:nth-child(3){opacity:.3;}
+  .miniweb .page{padding:16px 14px 18px; background:#0d0d10; text-align:center;}
+  .miniweb .page .mh{font-weight:800; font-size:20px; letter-spacing:-0.03em; line-height:1;}
+  .miniweb .page .mh em{font-style:normal; color:var(--orange);}
+  .miniweb .page .ms{font-size:8px; color:var(--ink-dim); margin-top:6px; line-height:1.5;}
+  .miniweb .page .mb{display:inline-block; margin-top:9px; font-size:8px; font-weight:700; color:#0a0a0c; background:var(--orange); border-radius:4px; padding:4px 9px;}
+
+  /* chat mock */
+  .chat{display:flex; flex-direction:column; gap:8px; margin-top:4px;}
+  .msg{max-width:86%; font-size:11.5px; line-height:1.5; padding:9px 12px; border-radius:12px;}
+  .msg.them{align-self:flex-start; background:rgba(232,230,225,0.08); border:1px solid var(--line); border-bottom-left-radius:3px;}
+  .msg.ai{align-self:flex-end; background:rgba(255,122,26,0.13); border:1px solid rgba(255,122,26,0.3); border-bottom-right-radius:3px;}
+  .msg .who{display:block; font-size:8px; color:var(--ink-dim); margin-bottom:3px; letter-spacing:0.1em; text-transform:uppercase;}
+
+  /* pipeline mock */
+  .pipe{display:flex; flex-direction:column; gap:10px; margin-top:4px;}
+  .step{display:flex; align-items:center; gap:10px; font-size:11.5px;}
+  .step .dot{
+    width:20px; height:20px; border-radius:50%; flex:0 0 20px;
+    border:1px solid rgba(255,122,26,0.5); color:var(--orange);
+    display:flex; align-items:center; justify-content:center; font-size:10px;
+  }
+  .step .ln{color:var(--ink-dim); font-size:9px; margin-left:auto;}
+  .step.done .dot{background:var(--orange); color:#0a0a0c; border-color:var(--orange);}
+
+  .big{font-size:44px; font-weight:800; letter-spacing:-0.04em; line-height:1;}
+  .big em{font-style:normal; color:var(--orange);}
+
+  .cta{
+    display:inline-block; margin-top:28px;
+    background:var(--orange); color:#0a0a0c;
+    font-size:13px; font-weight:700; text-decoration:none;
+    padding:14px 28px; border-radius:6px;
+    transition:transform .2s, background .2s;
+  }
+  .cta:hover{background:#ff8d3c; transform:translateY(-1px);}
+
+  /* content reveal for headings */
+  .fx{opacity:0; transform:translateY(30px); filter:blur(5px); transition:opacity .8s ease, transform .8s ease, filter .8s ease;}
+  .sec.live .fx{opacity:1; transform:none; filter:none;}
+  .sec.live .fx:nth-of-type(2){transition-delay:.07s;}
+  .sec.live .fx:nth-of-type(3){transition-delay:.14s;}
+
+  #scrollHint{
+    position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+    z-index:30; font-size:10px; color:rgba(138,138,134,0.7);
+    animation:bob 2s ease-in-out infinite;
+  }
+  @keyframes bob{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,6px);}}
+  /* ===== mobile (must stay LAST so it overrides the base rules) =====
+     Same experience as desktop — cards still fly in from depth —
+     just stacked, compacted and scaled so a phone viewport fits it. */
+  @media (max-width:760px){
+    #rail{display:none;}
+    nav{padding:12px 14px;}
+    .nav-tag{display:none;}
+    .nav-cta{font-size:9px; padding:8px 12px;}
+    .heroSec h1, .sec h1{letter-spacing:0.16em !important; font-size:clamp(15px,4.4vw,20px) !important;}
+    .sec{padding:0 5vw;}
+    h2{font-size:clamp(24px,7.8vw,38px);}
+    .sub{font-size:12px; max-width:88vw; margin-top:8px;}
+    .idx{margin-bottom:8px;}
+    #logoZone{height:30vh !important;}
+    .heroSec p{margin-top:12px;}
+    .stage3d{margin-top:12px; transform:scale(0.95); transform-origin:top center;}
+    .tilt{flex-direction:column; align-items:center; gap:12px;}
+    .gcard{width:90vw; max-width:380px; padding:18px 20px;}
+    .gcard h4{font-size:13.5px; margin-bottom:9px;}
+    .gcard .quote{margin-top:12px; font-size:10.5px;}
+    .msg{font-size:11px; padding:8px 11px;}
+    .big{font-size:32px;}
+    .miniweb .page{padding:10px 10px 12px;}
+    .pipe{gap:6px;}
+    .step{font-size:10px;}
+    .cta{padding:12px 22px; font-size:12px;}
+    #scrollHint{bottom:12px;}
+  }
+
+/* ===== concepts ===== */
+
   /* ===== Preston Scott Systems design tokens — lifted verbatim from templates/index.html ===== */
   :root{
     --bg:#0a0a0c;
@@ -330,17 +572,71 @@
     .vsrow > div{border-bottom:1px solid rgba(232,230,225,.06);}
     .close{padding:86px 6vw 76px;}
   }
+
+
+  /* ===================================================================
+     Hero + concepts coexistence. #product MUST be positioned with a
+     z-index above the fixed hero layers (#cv is 2, #world is 5) or the
+     whole page renders underneath the canvas.
+     =================================================================== */
+  #product{position:relative; z-index:6; background:var(--bg);}
+
+  /* The hero owns the top of the screen now, and the site's real <nav>
+     sits there too — so the concept switcher moves to a floating pill at
+     the bottom. It is scaffolding, not part of any concept. */
+  .stage{padding-top:0;}
+  /* bottom-RIGHT, not bottom-centre: the hero's "SCROLL" hint and every
+     section heading are centred, and a centred pill sits on top of them. */
+  #switch{
+    top:auto; bottom:20px; left:auto; right:20px;
+    transform:none;
+    width:max-content; max-width:94vw;
+    border:1px solid var(--line); border-radius:999px;
+    padding:9px 12px; gap:6px;
+    box-shadow:0 18px 50px rgba(0,0,0,.6);
+  }
+  #switch .brand{display:none;}
+  @media(max-width:820px){
+    /* the right rail claims the right edge on narrow screens */
+    #switch{left:50%; right:auto; transform:translateX(-50%); bottom:12px; padding:7px 9px;}
+    #switch button{padding:8px 10px; font-size:9px; letter-spacing:.08em;}
+  }
+
 </style>
 </head>
 <body>
 
-<div id="switch">
-  <div class="brand">PS<span>×</span>AI <i>Model concepts · sell websites</i></div>
-  <button class="on" data-c="a">01 — The Build</button>
-  <button data-c="b">02 — The Audit</button>
-  <button data-c="c">03 — The Comparison</button>
+<canvas id="cv"></canvas>
+
+<nav>
+  <div style="display:flex;align-items:center;gap:22px;">
+    <div class="logo">PS<span>×</span>AI</div>
+    <div class="nav-tag mono">Oklahoma</div>
+  </div>
+  <a class="nav-cta mono" href="tel:+19183730512">+ Call or text (918) 373-0512</a>
+</nav>
+
+<div id="rail" class="mono">
+  <div>01</div><div>02</div><div>03</div><div>04</div><div>05</div>
+</div>
+<div id="scrollHint" class="mono">Scroll</div>
+
+<div id="spacer"></div>
+
+<div id="world">
+
+  <!-- 01 · HERO -->
+  <section class="sec">
+    <div class="eyebrow mono fx">Websites &amp; AI Systems</div>
+    <!-- the 3D silver logo is rendered by the particles on the canvas -->
+    <div id="logoZone" style="height:clamp(150px,20vw,250px);"></div>
+    <h1 class="fx" style="font-size:clamp(22px,3vw,34px); letter-spacing:0.34em; margin-top:2px;">BUILT&nbsp;TO&nbsp;<em style="font-style:normal;color:var(--orange)">RUN</em></h1>
+    <p class="sub fx">Custom websites and practical AI tools for Oklahoma small businesses. Scroll — the system assembles itself.</p>
+  </section>
+
 </div>
 
+<main id="product">
 <div class="stage">
 
 <!-- ================================================================
@@ -852,10 +1148,283 @@
   </section>
 </div>
 
-</div><!-- /stage -->
+</div>
+</main>
 
+<div id="switch">
+  <div class="brand">PS<span>×</span>AI <i>Model concepts · sell websites</i></div>
+  <button class="on" data-c="a">01 — The Build</button>
+  <button data-c="b">02 — The Audit</button>
+  <button data-c="c">03 — The Comparison</button>
+</div>
 <div id="lightbox"><button class="close">Close · Esc</button><img alt=""></div>
 
+<script>
+/* =========================================================
+   v2 — true 3D particle space + buttery snap scroll.
+   - Field particles live in 3D; the camera dollies forward
+     as you scroll, so travel between sections is a dive
+     through the swarm (cinematic depth transition).
+   - Logo particles start scattered, condense into "PS×AI",
+     then the chrome 3D logo materializes through them.
+   - DOM world is translated by a lerped scroll for butter;
+     idle snap eases each section into place.
+   - Glass cards fly in from deep Z and tilt with the mouse.
+   ========================================================= */
+const IS_MOBILE = matchMedia('(max-width:760px)').matches
+  || (navigator.maxTouchPoints>0 && innerWidth<900);
+
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let W,H,DPR;
+/* lock viewport height so the mobile URL-bar collapse can't cause
+   scroll jumps; refresh only on real width/orientation changes */
+let VH=innerHeight, lastW=innerWidth;
+function resize(force){
+  /* URL-bar show/hide fires resize on every scroll direction change on
+     phones — rebuilding particles then causes visible glitches. Only do
+     real work when the width (orientation) actually changes. */
+  const wChanged=Math.abs(innerWidth-lastW)>60;
+  if(!force && !wChanged) return;
+  VH=innerHeight; lastW=innerWidth;
+  DPR=Math.min(window.devicePixelRatio||1, IS_MOBILE?1.5:2);
+  cv.style.width='100vw';
+  cv.style.height=VH+'px';                 // locked px height: immune to URL bar
+  W=innerWidth; H=VH;
+  cv.width=W*DPR; cv.height=H*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  document.querySelectorAll('.sec').forEach(s=>s.style.height=VH+'px');
+  document.getElementById('spacer').style.height = (SECTIONS*VH)+'px';
+  buildLogoTargets();
+}
+window.addEventListener('resize',()=>resize(false));
+
+const SECTIONS=1;                 /* hero only; product scrolls normally below */
+const scrollHintEl=document.getElementById('scrollHint');
+const world=document.getElementById('world');
+const secEls=[...document.querySelectorAll('.sec')];
+const railDots=[...document.querySelectorAll('#rail div')];
+
+const ORANGE=[255,122,26], SILVER=[176,178,188], INK=[232,230,225];
+
+/* ---------- 3D field ---------- */
+const F=700;                    // focal length
+const DEPTH_PER_SEC=1400;       // camera travel per section
+const NF=IS_MOBILE?320:850;                      // light dust sprinkles throughout
+const field=[];
+function initField(){
+  field.length=0;
+  for(let i=0;i<NF;i++){
+    field.push({
+      x:(Math.random()*2-1)*1600,
+      y:(Math.random()*2-1)*1000,
+      z:Math.random()*DEPTH_PER_SEC*(SECTIONS+2),
+      c:Math.random()<0.16?ORANGE:SILVER,
+      s:0.9+Math.random()*1.8,                 // fine dust field
+      tw:Math.random()*Math.PI*2,
+    });
+  }
+}
+
+/* ---------- logo particles ---------- */
+const NL=IS_MOBILE?3400:6500;
+let logoPts=[];
+const logoParts=[];
+let logoCY=0;
+function buildLogoTargets(){
+  const off=document.createElement('canvas');
+  off.width=W; off.height=H;
+  const o=off.getContext('2d');
+  let fs=IS_MOBILE? W*0.30 : Math.min(W*0.14,190);     // logo reads big on phones
+  logoCY=H*0.40;
+  /* on phones, anchor the logo to the layout's reserved zone so it can't
+     drift into the copy on any screen size */
+  const zone=document.getElementById('logoZone');
+  if(IS_MOBILE && zone){
+    const r=zone.getBoundingClientRect();
+    if(r.height>0){ logoCY=r.top+r.height/2; fs=Math.min(W*0.30, r.height*1.15); }
+  }
+  o.font=`800 ${fs}px Inter, sans-serif`;
+  o.textAlign='center'; o.textBaseline='middle';
+  o.fillStyle='#fff';
+  o.fillText('PS×AI', W/2, logoCY);
+  const d=o.getImageData(0,0,W,H).data;
+  logoPts=[];
+  const st=IS_MOBILE?3:2;   // coarser sampling on phones = every point gets grains = solid letters
+  for(let y=0;y<H;y+=st) for(let x=0;x<W;x+=st){
+    if(d[(y*W+x)*4+3]>90){
+      /* extrude: every glyph pixel gets a depth so the logo is a 3D slab */
+      logoPts.push({x,y,z:(Math.random()*2-1)*30});
+    }
+  }
+  for(let i=logoPts.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [logoPts[i],logoPts[j]]=[logoPts[j],logoPts[i]];
+  }
+}
+function initLogoParts(){
+  logoParts.length=0;
+  for(let i=0;i<NL;i++){
+    logoParts.push({
+      tw:Math.random()*Math.PI*2,
+      s:Math.random()<0.8?1:1.6,                   // fine dust, mostly 1px
+    });
+  }
+}
+
+/* ---------- buttery scroll + snap ---------- */
+let smoothY=0, snapT=null, lastScroll=0;
+/* idle snap fights momentum scrolling on touch devices — desktop only */
+if(!IS_MOBILE){
+  window.addEventListener('scroll',()=>{
+    lastScroll=performance.now();
+    if(snapT){clearTimeout(snapT);}
+    snapT=setTimeout(()=>{
+      if(window.scrollY > VH*0.85) return;   /* past the hero: let it scroll freely */
+      const sh=VH;
+      const near=Math.round(window.scrollY/sh)*sh;
+      if(Math.abs(window.scrollY-near)>4){
+        window.scrollTo({top:near, behavior:'smooth'});
+      }
+    },170);
+  },{passive:true});
+}
+
+railDots.forEach((d,i)=>d.addEventListener('click',()=>{
+  const t=document.getElementById('p'+(i+1));
+  if(t) window.scrollTo({top:t.offsetTop, behavior:'smooth'});
+}));
+
+/* ---------- mouse (card tilt + slight camera drift) ---------- */
+const mouse={x:0.5,y:0.5};
+window.addEventListener('mousemove',e=>{
+  mouse.x=e.clientX/innerWidth; mouse.y=e.clientY/innerHeight;
+});
+
+function smootherstep(x){ x=Math.min(1,Math.max(0,x)); return x*x*x*(x*(x*6-15)+10); }
+/* soft satin silver ramp — the v2 chrome tone, applied to the dust */
+function satin(b){
+  if(b<0.5){ const f=b/0.5; return [72+f*90, 73+f*91, 80+f*92]; }
+  const f=(b-0.5)/0.5; return [162+f*74, 164+f*74, 172+f*70];
+}
+
+function frame(nowMs){
+  const t=nowMs/1000;
+  smoothY+=(window.scrollY-smoothY)*0.085;
+  world.style.transform=`translateY(${-smoothY}px)`;
+
+  /* hand off from the cinematic hero to the product content */
+  const heroOut=Math.min(1,Math.max(0,(smoothY-VH*0.15)/(VH*0.55)));
+  cv.style.opacity=String(1-heroOut);
+  if(scrollHintEl) scrollHintEl.style.opacity=String(1-heroOut);
+
+  const prog=smoothY/VH;                          // fractional section
+  const active=Math.min(SECTIONS-1,Math.max(0,Math.round(prog)));
+  secEls.forEach((s,i)=>s.classList.toggle('live', i===active));
+  /* rail 'on' state is driven by the product sections (see product script) */
+
+  /* card tilt for active section */
+  const tilt=secEls[active].querySelector('.tilt');
+  if(tilt){
+    const rx=(mouse.y-0.5)*-7, ry=(mouse.x-0.5)*9;
+    tilt.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
+  }
+
+  /* ---------- render 3D field (transparent — films show through) ---------- */
+  ctx.clearRect(0,0,W,H);
+
+  const camZ=prog*DEPTH_PER_SEC;
+  const camX=(mouse.x-0.5)*120, camY=(mouse.y-0.5)*80;
+  const totalDepth=DEPTH_PER_SEC*(SECTIONS+2);
+
+  for(const p of field){
+    let dz=p.z-camZ;
+    if(dz<40){ p.z+=totalDepth; dz=p.z-camZ; }
+    if(dz>totalDepth) continue;
+    const k=F/dz;
+    const sx=W/2+(p.x-camX)*k;
+    const sy=H/2+(p.y-camY)*k;
+    if(sx<-30||sx>W+30||sy<-30||sy>H+30) continue;
+    p.tw+=0.02;
+    const twk=0.7+0.3*Math.sin(p.tw*2);
+    const a=Math.min(0.6, k*1.2)*twk;              // gentle sprinkles
+    const sz=Math.max(0.5, p.s*k*1.5);
+    ctx.fillStyle=`rgba(${p.c[0]},${p.c[1]},${p.c[2]},${a.toFixed(2)})`;
+    ctx.fillRect(sx,sy,sz,sz);
+  }
+
+  /* ---------- logo particles: fine dust forms a rotating 3D SILVER logo ---------- */
+  const heroFac=smootherstep(1-prog*1.6);                  // eased 1 at top → 0 by ~60% of s1
+  const condense=smootherstep(t/3.0);                      // slow, silky condensation
+  if(heroFac>0.01){
+    /* slow 3D turn + mouse steering */
+    const rot=Math.sin(t*0.30)*0.5+(mouse.x-0.5)*1.1;
+    const cR=Math.cos(rot), sR=Math.sin(rot);
+    const tilt=(mouse.y-0.5)*0.25;
+    const cx2=W/2, cy2=logoCY||H*0.40, LF=850;
+
+    for(let i=0;i<NL;i++){
+      const p=logoParts[i];
+      p.tw+=0.02;
+      const tgt=logoPts.length? logoPts[i%logoPts.length] : {x:W/2,y:H*0.4,z:0};
+
+      /* rotate the extruded point cloud around its vertical axis */
+      const rx=(tgt.x-cx2)*cR - tgt.z*sR;
+      const rz=(tgt.x-cx2)*sR + tgt.z*cR;
+      const k=LF/(LF+rz);
+      const txp=cx2+rx*k;
+      const typ=cy2+(tgt.y-cy2)*k + rx*tilt*0.12;          // slight X-tilt from mouse
+
+      /* condense: spiral in toward the (moving) projected target */
+      const scat=1-condense;
+      const ang=p.tw*0.6+i;
+      /* EXPLOSION on scroll-away: each grain blasts radially out from the
+         logo center along its own vector, scrubbed by scroll (reversible) */
+      const bang=(1-heroFac)*(1-heroFac);
+      const bdx=tgt.x-cx2, bdy=tgt.y-cy2;
+      const bd=Math.sqrt(bdx*bdx+bdy*bdy)||1;
+      const bspd=0.45+((i*7919)%100)/125;                  // per-grain speed
+      const x=txp+Math.cos(ang)*190*scat*scat + Math.sin(p.tw*1.1)*0.5
+              + (bdx/bd)*bang*W*0.6*bspd + Math.cos(i*2.3)*bang*70;
+      const y=typ+Math.sin(ang*0.9)*130*scat*scat + Math.cos(p.tw)*0.5
+              + (bdy/bd)*bang*H*0.7*bspd + Math.sin(i*1.7)*bang*70;
+
+      /* satin silver shading: front-facing dust is brighter, plus a slow sheen band */
+      const depthLit=0.5-rz/76;                            // rz∈[-38,38] → 1..0
+      const sheenX=W*0.5+Math.sin(t*0.45)*W*0.24;
+      const sheen=Math.exp(-Math.pow(x-sheenX,2)/(2*95*95));
+      let b=0.22+0.55*depthLit*condense+sheen*0.38;
+      if(b>1) b=1;
+      const c=satin(b);
+
+      /* stay visible through the blast, fade as grains reach the edges */
+      const a=(0.92*Math.min(1,heroFac*1.6))*(0.78+0.22*Math.sin(p.tw*2.2));
+      if(a<0.02) continue;
+      ctx.fillStyle=`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a.toFixed(2)})`;
+      const sz=p.s*k;
+      ctx.fillRect(x,y,sz,sz);
+    }
+  }
+
+  requestAnimationFrame(frame);
+}
+
+resize(true);
+initField();
+initLogoParts();
+document.fonts.ready.then(buildLogoTargets);
+requestAnimationFrame(frame);
+
+/* film autoplay kick + watchdog (battery-saver / autoplay policies) */
+const films=[...document.querySelectorAll('.filmstack video')];
+function kickFilms(){
+  films.forEach(v=>{ v.muted=true; const p=v.play(); if(p&&p.catch) p.catch(()=>{}); });
+}
+window.addEventListener('load',kickFilms);
+document.addEventListener('pointerdown',kickFilms);
+document.addEventListener('scroll',kickFilms,{once:true});
+setInterval(()=>{ films.forEach(v=>{ if(v.paused){ const p=v.play(); if(p&&p.catch) p.catch(()=>{}); } }); },3000);
+</script>
 <script>
 /* ---------- concept switcher ---------- */
 document.querySelectorAll('#switch button').forEach(function(b){
